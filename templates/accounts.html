@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}Accounts{% endblock %}
+
+{% block body_block %}
+
+    <!--
+        PAGE HEADER
+
+        CLASSES:
+            .page-header-xs	= 20px margins
+            .page-header-md	= 50px margins
+            .page-header-lg	= 80px margins
+            .page-header-xlg= 130px margins
+            .dark			= dark page header
+
+            .shadow-before-1 	= shadow 1 header top
+            .shadow-after-1 	= shadow 1 header bottom
+            .shadow-before-2 	= shadow 2 header top
+            .shadow-after-2 	= shadow 2 header bottom
+            .shadow-before-3 	= shadow 3 header top
+            .shadow-after-3 	= shadow 3 header bottom
+    -->
+    <section class="page-header page-header-xs">
+        <div class="container">
+
+            <h1>ACCOUNTS</h1>
+
+            <!-- breadcrumbs -->
+            <ol class="breadcrumb">
+                <li><a href="/">Home</a></li>
+                <li>Officers</li>
+                <li class="active">Accounts</li>
+            </ol><!-- /breadcrumbs -->
+
+        </div>
+    </section>
+    <!-- /PAGE HEADER -->
+
+    <!-- -->
+    <section>
+        <div class="container">
+
+            <h4>Accounts</h4>
+            {% if game_accounts %}
+            <div class="table-responsive">
+						<table class="table table-bordered table-striped table-vertical-middle">
+							<thead>
+								<tr>
+									<th>Name</th> <!-- class="width-30" -->
+									<th class="width-200">Owner</th>
+									<th class="width-200">Guild</th>
+                                    <th class="width-200">Owned Cards</th>
+                                    <th class="width-200">Canvas</th>
+								</tr>
+							</thead>
+							<tbody>
+                                {% for game_account in game_accounts %}
+								<tr>
+									<td>{{ game_account.name }}</td>
+									<td>{{ game_account.user.username }}</td>
+									<td>{{ game_account.guild }}</td>
+                                    <td class="text-center">
+
+                                        {% if game_account.postdata %}
+                                            <a href="{% url 'owned_cards' %}?account_name={{ game_account.name }}" class="btn btn-info btn-reveal btn-sm">
+                                                <i class="et-document"></i>
+                                                <span>Download</span>
+                                            </a>
+                                        {% endif %}
+
+                                    </td>
+                                    <td class="text-center">
+                                        {% if game_account.canvas %}
+                                            <a href="{% url 'open_canvas' %}?account_name={{ game_account.name }}" target="_blank" class="btn btn-warning btn-xs width-100">Canvas</a>
+                                            {% for action in action_log %}
+                                                {% if action.target_id == game_account.id %}
+                                                    <br><span class="size-11"><strong>{{ action.user.username }}</strong>  {{ action.date|date:"d/m/Y" }} {{ action.date|date:"H:i" }}</span>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    </td>
+								</tr>
+                                {% endfor %}
+							</tbody>
+						</table>
+					</div>
+            {% else %}
+                <div class="alert alert-danger margin-bottom-30"><!-- DANGER -->
+                    <strong>Oh snap!</strong> There are no accounts to show!
+                </div>
+
+            {% endif %}
+        </div>
+    </section>
+
+{% endblock %}

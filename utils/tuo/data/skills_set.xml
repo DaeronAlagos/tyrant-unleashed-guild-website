@@ -1,0 +1,611 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<root>
+
+	<unitType>
+		<id>1</id>
+		<name>Imperial</name>
+		<image>CardImperialStyled</image>
+	</unitType>
+	<unitType>
+		<id>2</id>
+		<name>Raider</name>
+		<image>CardRaiderStyle</image>
+	</unitType>
+	<unitType>
+		<id>3</id>
+		<name>Bloodthirsty</name>
+		<image>CardBloodthirstyStyle</image>
+	</unitType>
+	<unitType>
+		<id>4</id>
+		<name>Xeno</name>
+		<image>CardXenoStyle</image>
+	</unitType>
+	<unitType>
+		<id>5</id>
+		<name>Righteous</name>
+		<image>CardRighteousStyle</image>
+	</unitType>
+	<unitType>
+		<id>6</id>
+		<name>Progenitor</name>
+		<image>CardRighteousStyle</image>
+	</unitType>
+
+	<skillType>
+		<id>0</id>
+		<name>Attack</name>
+		<target_anim>minigunAttack.swf</target_anim>
+		<hidden>1</hidden>
+		<anim flipY='1'>attackergun.swf</anim>
+		<sound>MachineGunSound</sound>
+	</skillType>
+	<skillType>
+		<id>wall</id>
+		<name>Wall</name>
+		<icon>WallSkillIcon</icon>
+		<target_anim>wall_siege</target_anim>
+		<desc>Absorbs damage dealt to the Commander</desc>
+		<attributes x='0' y='0' all='0' c='0' s='0' s2='0' n='0' />
+		<sound>ArmoredSound</sound>
+		<order>3000</order>
+	</skillType>
+	<skillType>
+		<id>armored</id>
+		<name>Armor</name>
+		<icon>ArmoredSkillIcon</icon>
+		<target_anim>armored</target_anim>
+		<desc>Prevents damage taken by attacks</desc>
+		<attributes x='1' y='0' all='0' c='0' s='0' s2='0' n='0' />
+		<sound>ArmoredSound</sound>
+		<order>4000</order>
+	</skillType>
+	<skillType>
+		<id>counter</id>
+		<name>Counter</name>
+		<icon>CounterSkillIcon</icon>
+		<target_anim>counter</target_anim>
+		<desc>When damaged by an attack, deal damage to attacker</desc>
+		<attributes x='1' y='0' all='0' c='0' s='0' s2='0' n='0' />
+		<sound>LeechSound</sound>
+		<order>6000</order>
+	</skillType>
+	<skillType>
+		<id>heal</id>
+		<name>Heal</name>
+		<icon>HealSkillIcon</icon>
+		<target_anim>heal</target_anim>
+		<desc>Heals a random allied Assault card</desc>
+		<desc_all>Heals all allied Assault cards</desc_all>
+		<desc_faction>Heals a random allied y Assault card</desc_faction>
+		<desc_all_faction>Heals all allied y Assault cards</desc_all_faction>
+		<attributes x='1' y='1' all='1' c='0' s='0' s2='0' n='0' />
+		<sound>BoostSound</sound>
+		<order>105000</order>
+	</skillType>
+	<skillType>
+		<id>rally</id>
+		<name>Rally</name>
+		<icon>RallySkillIcon</icon>
+		<target_anim>rally</target_anim>
+		<desc>Boosts Attack of a random allied Assault card</desc>
+		<desc_all>Boosts Attack of all allied Assault cards</desc_all>
+		<desc_faction>Boosts Attack of a random allied y Assault card</desc_faction>
+		<desc_all_faction>Boosts Attack of all allied y Assault cards</desc_all_faction>
+		<attributes x='1' y='1' all='1' c='0' s='0' s2='0' n='0' />
+		<sound>BoostSound</sound>
+		<order>107000</order>
+	</skillType>
+	<skillType>
+		<id>strike</id>
+		<name>Strike</name>
+		<icon>MissileSkillIcon</icon>
+		<target_anim>strike</target_anim>
+		<desc>Deals damage to a random enemy Assault card</desc>
+		<desc_all>Deals damage to all enemy Assault cards</desc_all>
+		<desc_faction>Deals damage to a random enemy y Assault card</desc_faction>
+		<desc_all_faction>Deals damage to all enemy y Assault cards</desc_all_faction>
+		<attributes x='1' y='0' all='1' c='0' s='0' s2='0' n='0' />
+		<sound>StrikeSound</sound>
+		<order>109000</order>
+	</skillType>
+	<skillType>
+		<id>weaken</id>
+		<name>Weaken</name>
+		<icon>WeakenSkillIcon</icon>
+		<target_anim>weaken</target_anim>
+		<desc>Reduces Attack of a random enemy Assault card</desc>
+		<desc_all>Reduces the Attack of all enemy Assault cards</desc_all>
+		<desc_faction>Reduces the Attack of a random enemy y Assault card</desc_faction>
+		<desc_all_faction>Reduces the attack of all enemy y Assault cards</desc_all_faction>
+		<attributes x='1' y='0' all='1' c='0' s='0' s2='0' n='0' />
+		<sound>WeakenSound</sound>
+		<order>111000</order>
+	</skillType>
+	<skillType>
+		<id>siege</id>
+		<name>Siege</name>
+		<icon>SiegeSkillIcon</icon>
+		<target_anim>wall_siege</target_anim>
+		<desc>Deals damage to a random enemy Structure card</desc>
+		<desc_all>Deals damage to all enemy Structure cards</desc_all>
+		<attributes x='1' y='0' all='1' c='0' s='0' s2='0' n='0' />
+		<sound>SiegeSound</sound>
+		<order>112000</order>
+	</skillType>
+	<skillType>
+		<id>pierce</id>
+		<name>Pierce</name>
+		<icon>AttackSkillIcon</icon>
+		<desc>Reduces the effect of Damage Prevention</desc>
+		<attributes x='1' y='0' all='0' c='0' s='0' s2='0' n='0' />
+		<target_anim>pierce</target_anim>
+		<sound>SiegeSound</sound>
+		<order>152000</order>
+	</skillType>
+	<skillType>
+		<id>poison</id>
+		<name>Poison</name>
+		<icon>PoisonSkillIcon</icon>
+		<status_flag>poison</status_flag>
+		<status_icon>poison32</status_icon>
+		<target_anim>poison</target_anim>
+		<loop_anim>poison_loop</loop_anim>
+		<desc>Poisons enemy damaged by this card, dealing additional damage during the End phase</desc>
+		<attributes x='1' y='0' all='0' c='0' s='0' s2='0' n='0' />
+		<sound>PoisonSound</sound>
+		<order>202000</order>
+	</skillType>
+	<skillType>
+		<id>leech</id>
+		<name>Leech</name>
+		<icon>LeechSkillIcon</icon>
+		<anim>leech_siphon</anim>
+		<desc>Heals this card as it deals Attack damage to an Assault card</desc>
+		<attributes x='1' y='0' all='0' c='0' s='0' s2='0' n='0' />
+		<sound>LeechSound</sound>
+		<order>203000</order>
+	</skillType>
+	<skillType>
+		<id>evade</id>
+		<name>Evade</name>
+		<icon>EvadeSkillIcon</icon>
+		<anim>leech_siphon</anim>
+		<desc>Avoids enemy skills</desc>
+		<attributes x='1' y='0' all='0' c='0' s='0' s2='0' n='0' />
+		<sound>LeechSound</sound>
+		<order>1000</order>
+	</skillType>
+	<skillType>
+		<id>berserk</id>
+		<name>Berserk</name>
+		<icon>LeechSkillIcon</icon>
+		<anim>leech_siphon</anim>
+		<desc>When this unit deals attack damage, Attack is permanently boosted</desc>
+		<attributes x='1' y='0' all='0' c='0' s='0' s2='0' n='0' />
+		<sound>SiegeSound</sound>
+		<order>204000</order>
+	</skillType>
+	<skillType>
+		<id>enfeeble</id>
+		<name>Enfeeble</name>
+		<icon>EnfeebleSkillIcon</icon>
+		<anim>enfeeble</anim>
+		<desc>Increase Damage dealt to a random enemy Assault card</desc>
+		<desc_all>Increase Damage dealt to all enemy Assault cards</desc_all>
+		<attributes x='1' y='0' all='1' c='0' s='0' s2='0' n='0' />
+		<sound>EnfeebleSound</sound>
+		<order>108000</order>
+	</skillType>
+	<skillType>
+		<id>protect</id>
+		<name>Protect</name>
+		<icon>ProtectSkillIcon</icon>
+		<status_flag>protect</status_flag>
+		<status_icon>protect32</status_icon>
+		<anim>protect</anim>
+		<desc>Reduces Damage dealt to a random allied Assault card</desc>
+		<desc_all>Reduces Damage dealt to all allied Assault cards</desc_all>
+		<desc_faction>Reduces Damage dealt to a random allied y Assault card</desc_faction>
+		<desc_all_faction>Reduces Damage dealt to all allied y Assault cards</desc_all_faction>
+		<attributes x='1' y='1' all='1' c='0' s='0' s2='0' n='0' />
+		<sound>ProtectSound</sound>
+		<order>106000</order>
+	</skillType>
+	<skillType>
+		<id>enhance</id>
+		<name>Enhance</name>
+		<icon>EnhanceSkillIcon</icon>
+		<anim>enhance</anim>
+		<desc>Increase effect of skill on a random allied Assault card</desc>
+		<desc_all>Increase effect of skill on all allied Assault cards</desc_all>
+		<desc_faction>Increase effect of skill on a random allied y Assault card</desc_faction>
+		<desc_all_faction>Increase effect of skill on all allied y Assault cards</desc_all_faction>
+		<attributes x='1' y='0' all='1' c='0' s='1' s2='0' n='1' />
+		<sound>RallySound</sound>
+		<order>101000</order>
+	</skillType>
+	<skillType>
+		<id>jam</id>
+		<name>Jam</name>
+		<icon>JamSkillIcon</icon>
+		<status_flag>jam_countdown</status_flag>
+		<status_icon>jam32</status_icon>
+		<anim>jam</anim>
+		<loop_anim>jam_loop</loop_anim>
+		<desc>Random enemy unit doesn't attack or activate abilities next turn. Cools down before activated again.</desc>
+		<desc_all>Enemy units doesn't attack or activate abilities next turn. Cools down before activated again.</desc_all>
+		<attributes x='0' y='0' all='1' c='1' s='0' s2='0' n='1' />
+		<sound>PoisonSound</sound>
+		<order>110000</order>
+	</skillType>
+	<skillType>
+		<id>corrosive</id>
+		<name>Corrosive</name>
+		<icon>PoisonSkillIcon</icon>
+		<status_flag>corrosive</status_flag>
+		<status_icon>corrosive32</status_icon>
+		<anim>enfeeble</anim>
+		<desc>Corrode unit that damages this by attack. That unit loses Attack if it attacks, else lose Corrode.</desc>
+		<attributes x='1' y='0' all='0' c='0' s='0' s2='0' n='0' />
+		<sound>PoisonSound</sound>
+		<order>7000</order>
+	</skillType>
+	<skillType>
+		<id>inhibit</id>
+		<name>Inhibit</name>
+		<icon>PoisonSkillIcon</icon>
+		<status_flag>inhibited</status_flag>
+		<status_icon>inhibit32</status_icon>
+		<anim>jam</anim>
+		<loop_anim>jam_loop</loop_anim>
+		<desc>Inhibits enemy Assault damaged by this card. Inhibited units avoid their own friendly skills.</desc>
+		<attributes x='1' y='0' all='0' c='0' s='0' s2='0' n='0' />
+		<sound>PoisonSound</sound>
+		<order>201000</order>
+	</skillType>
+	<skillType>
+		<id>flurry</id>
+		<name>Flurry</name>
+		<icon>PoisonSkillIcon</icon>
+		<status_flag>flurry_countdown</status_flag>
+		<status_icon>flurry32</status_icon>
+		<anim>jam</anim>
+		<loop_anim>jam_loop</loop_anim>
+		<desc>After this card attacks, Activate skills and Attack again. Cools down before activated again.</desc>
+		<attributes x='0' y='0' all='0' c='1' s='0' s2='0' n='0' />
+		<sound>PoisonSound</sound>
+		<order>251000</order>
+	</skillType>
+	<skillType>
+		<id>valor</id>
+		<name>Valor</name>
+		<icon>PoisonSkillIcon</icon>
+		<anim>jam</anim>
+		<loop_anim>jam_loop</loop_anim>
+		<desc>First time this activates, gain Attack permanently if opposing card has more Attack.</desc>
+		<attributes x='1' y='0' all='0' c='0' s='0' s2='0' n='0' />
+		<sound>PoisonSound</sound>
+		<order>51000</order>
+	</skillType>
+	<skillType>
+		<id>overload</id>
+		<name>Overload</name>
+		<icon>PoisonSkillIcon</icon>
+		<anim>jam</anim>
+		<loop_anim>jam_loop</loop_anim>
+		<desc>Affected ally Assault cards cannot have skills avoided or prevented.</desc>
+		<desc_faction>Affected ally y Assault cards cannot have skills avoided or prevented.</desc_faction>
+		<desc_all>Ally Assault cards cannot have skills avoided or prevented.</desc_all>
+		<attributes x='0' y='1' all='1' c='0' s='0' s2='0' n='1' />
+		<sound>PoisonSound</sound>
+		<order>103000</order>
+	</skillType>
+	<skillType>
+		<id>legion</id>
+		<name>Legion</name>
+		<icon>PoisonSkillIcon</icon>
+		<anim>jam</anim>
+		<loop_anim>jam_loop</loop_anim>
+		<desc>Deal additional damage for each adjacent Assault card of the same Faction</desc>
+		<attributes x='1' y='0' all='0' c='0' s='0' s2='0' n='0' />
+		<sound>PoisonSound</sound>
+		<order>151000</order>
+	</skillType>
+	<skillType>
+		<id>payback</id>
+		<name>Payback</name>
+		<icon>PoisonSkillIcon</icon>
+		<anim>jam</anim>
+		<loop_anim>jam_loop</loop_anim>
+		<desc>Enemy Assault skills that target this unit, also target the acting enemy unit.</desc>
+		<attributes x='1' y='0' all='0' c='0' s='0' s2='0' n='0' />
+		<sound>PoisonSound</sound>
+		<order>2000</order>
+	</skillType>
+	<skillType>
+		<id>avenge</id>
+		<name>Avenge</name>
+		<icon>PoisonSkillIcon</icon>
+		<anim>jam</anim>
+		<loop_anim>jam_loop</loop_anim>
+		<desc>When an adjacent friendly assault dies, attack and max health are permanently boosted.</desc>
+		<attributes x='1' y='0' all='0' c='0' s='0' s2='0' n='0' />
+		<sound>PoisonSound</sound>
+		<order>5000</order>
+	</skillType>
+	<skillType>
+		<id>refresh</id>
+		<name>Refresh</name>
+		<icon>PoisonSkillIcon</icon>
+		<hidden>1</hidden>
+		<anim>jam</anim>
+		<loop_anim>jam_loop</loop_anim>
+		<desc>At the end of your turn, this heals itself.</desc>
+		<attributes x='1' y='0' all='0' c='0' s='0' s2='0' n='0' />
+		<sound>PoisonSound</sound>
+		<order>203001</order>
+	</skillType>
+	<skillType>
+		<id>evolve</id>
+		<name>Evolve</name>
+		<icon>PoisonSkillIcon</icon>
+		<anim>jam</anim>
+		<loop_anim>jam_loop</loop_anim>
+		<desc>A random friendly assault with s has that skill replaced with s2 until next turn.</desc>
+		<desc_all>All friendly assaults with s has that skill replaced with s2 until next turn.</desc_all>
+		<attributes x='0' y='0' all='1' c='0' s='1' s2='1' n='1' />
+		<sound>PoisonSound</sound>
+		<order>102000</order>
+	</skillType>
+	<skillType>
+		<id>venom</id>
+		<name>Venom</name>
+		<icon>PoisonSkillIcon</icon>
+		<anim>jam</anim>
+		<loop_anim>jam_loop</loop_anim>
+		<desc>If enemy is poisoned, deal additional attack damage. Then Poison enemy unit.</desc>
+		<sound>PoisonSound</sound>
+		<attributes x='1' y='0' all='0' c='0' s='0' s2='0' n='0' />
+		<hidden>1</hidden>
+		<order>202001</order>
+	</skillType>
+	<skillType>
+		<id>mend</id>
+		<name>Mend</name>
+		<icon>PoisonSkillIcon</icon>
+		<anim>jam</anim>
+		<loop_anim>jam_loop</loop_anim>
+		<desc>Restores health to adjacent units.</desc>
+		<attributes x='1' y='0' all='0' c='0' s='0' s2='0' n='0' />
+		<sound>PoisonSound</sound>
+		<order>104000</order>
+	</skillType>
+	<skillType>
+		<id>besiege</id>
+		<name>Mortar</name>
+		<icon>PoisonSkillIcon</icon>
+		<anim>jam</anim>
+		<loop_anim>jam_loop</loop_anim>
+		<desc>Deal damage to a random enemy structure or half damage to a random enemy Assault if no structures.</desc>
+		<desc_all>Deal damage to all enemy structures or half damage to all enemy Assaults if no structures.</desc_all>
+		<sound>PoisonSound</sound>
+		<attributes x='1' y='0' all='1' c='0' s='0' s2='0' n='0' />
+		<hidden>1</hidden>
+		<order>112001</order>
+	</skillType>
+	<skillType>
+		<id>swipe</id>
+		<name>Swipe</name>
+		<icon>PoisonSkillIcon</icon>
+		<anim>jam</anim>
+		<loop_anim>jam_loop</loop_anim>
+		<desc>When this attacks an enemy Assault card, deal damage to the adjacent enemy Assaults.</desc>
+		<attributes x='1' y='0' all='0' c='0' s='0' s2='0' n='0' />
+		<sound>PoisonSound</sound>
+		<order>153000</order>
+	</skillType>
+	<skillType>
+		<id>rupture</id>
+		<name>Rupture</name>
+		<icon>PoisonSkillIcon</icon>
+		<anim>jam</anim>
+		<loop_anim>jam_loop</loop_anim>
+		<desc>Deals additional Attack Damage and reduces the effect of Damage Prevention.</desc>
+		<sound>PoisonSound</sound>
+		<attributes x='1' y='0' all='0' c='0' s='0' s2='0' n='0' />
+		<hidden>1</hidden>
+		<order>152001</order>
+	</skillType>
+	<skillType>
+		<id>rush</id>
+		<name>Rush</name>
+		<icon>PoisonSkillIcon</icon>
+		<anim>jam</anim>
+		<loop_anim>jam_loop</loop_anim>
+		<desc>Reduces an allied Assault’s cost by 1 the first time this card activates.</desc>
+		<attributes x='0' y='0' all='0' c='0' s='0' s2='0' n='0' />
+		<sound>PoisonSound</sound>
+		<hidden>1</hidden>
+		<order>103500</order>
+	</skillType>
+	<skillType>
+		<id>sunder</id>
+		<name>Sunder</name>
+		<icon>PoisonSkillIcon</icon>
+		<anim>jam</anim>
+		<loop_anim>jam_loop</loop_anim>
+		<desc>Reduces Attack of random enemy Assault card and it can't gain Attack or deal extra damage.</desc>
+		<desc_all>Reduces Attack of all enemy Assault cards and they can't gain Attack or deal extra damage.</desc_all>
+		<attributes x='1' y='0' all='1' c='0' s='0' s2='0' n='0' />
+		<sound>PoisonSound</sound>
+		<hidden>1</hidden>
+		<order>111001</order>
+	</skillType>
+	<skillType>
+		<id>enrage</id>
+		<name>Enrage</name>
+		<icon>PoisonSkillIcon</icon>
+		<anim>jam</anim>
+		<loop_anim>jam_loop</loop_anim>
+		<desc>Pending</desc>
+		<attributes x='1' y='1' all='1' c='0' s='0' s2='0' n='0' />
+		<sound>PoisonSound</sound>
+		<hidden>1</hidden>
+		<order>103500</order>
+	</skillType>
+	<skillType>
+		<id>allegiance</id>
+		<name>Allegiance</name>
+		<icon>PoisonSkillIcon</icon>
+		<anim>jam</anim>
+		<loop_anim>jam_loop</loop_anim>
+		<desc>Pending</desc>
+		<attributes x='1' y='0' all='0' c='0' s='0' s2='0' n='0' />
+		<sound>PoisonSound</sound>
+		<hidden>1</hidden>
+		<order>103500</order>
+	</skillType>
+	<skillType>
+		<id>drain</id>
+		<name>Drain</name>
+		<icon>PoisonSkillIcon</icon>
+		<anim>jam</anim>
+		<loop_anim>jam_loop</loop_anim>
+		<desc>Pending</desc>
+		<attributes x='0' y='0' all='0' c='0' s='0' s2='0' n='0' />
+		<sound>PoisonSound</sound>
+		<hidden>1</hidden>
+		<order>103500</order>
+	</skillType>
+	
+	<card_locks>
+		<card_id>30976</card_id>
+		<card_id>30977</card_id>
+		<card_id>31184</card_id>
+		<card_id>34895</card_id>
+		<card_id>34896</card_id>
+		<card_id>34897</card_id>
+		<card_id>34898</card_id>
+		<card_id>34899</card_id>
+		<card_id>34900</card_id>
+		<card_id>34901</card_id>
+		<card_id>34902</card_id>
+		<card_id>34903</card_id>
+		<card_id>34904</card_id>
+		<card_id>34905</card_id>
+		<card_id>34906</card_id>
+		<card_id>34907</card_id>
+	</card_locks>
+	
+	<cardSet>
+		<id>1000</id>
+		<name>Standard</name>
+		<icon>StandardSetIcon</icon>
+		<visible>1</visible>
+		<pack_name>Standard Pack</pack_name>
+		<pack_picture>GoldPack</pack_picture>
+	</cardSet>
+	<cardSet>
+		<id>2000</id>
+		<name>Fusion</name>
+		<icon>FusionSetIcon</icon>
+		<visible>1</visible>
+	</cardSet>
+	<cardSet>
+		<id>2500</id>
+		<name>Base Fusion</name>
+		<icon>FusionSetIcon</icon>
+		<visible>1</visible>
+	</cardSet>
+	<cardSet>
+		<id>3000</id>
+		<name>Event</name>
+		<icon>RewardSetIcon</icon>
+		<visible>1</visible>
+	</cardSet>
+	<cardSet>
+		<id>3001</id>
+		<name>Event Alternate</name>
+		<icon>RewardSetIcon</icon>
+		<visible>1</visible>
+	</cardSet>
+	<cardSet>
+		<id>4000</id>
+		<name>PVE Reward</name>
+		<icon>RewardSetIcon</icon>
+		<visible>1</visible>
+	</cardSet>
+	<cardSet>
+		<id>4001</id>
+		<name>PVE Reward Hold</name>
+		<icon>RewardSetIcon</icon>
+		<visible>1</visible>
+	</cardSet>
+	<cardSet>
+		<id>4250</id>
+		<name>Mutant Reward</name>
+		<icon>RewardSetIcon</icon>
+		<visible>1</visible>
+	</cardSet>
+	<cardSet>
+		<id>4500</id>
+		<name>PVP Reward</name>
+		<icon>RewardSetIcon</icon>
+		<visible>1</visible>
+	</cardSet>
+	<cardSet>
+		<id>4501</id>
+		<name>PVP Reward Hold</name>
+		<icon>RewardSetIcon</icon>
+		<visible>1</visible>
+	</cardSet>
+	<cardSet>
+		<id>4700</id>
+		<name>PVE Legacy Reward</name>
+		<icon>RewardSetIcon</icon>
+		<visible>1</visible>
+	</cardSet>
+	<cardSet>
+		<id>4750</id>
+		<name>PVP Legacy Reward</name>
+		<icon>RewardSetIcon</icon>
+		<visible>1</visible>
+	</cardSet>
+	<cardSet>
+		<id>5000</id>
+		<name>Invisible Reward Set</name>
+		<icon>RewardSetIcon</icon>
+		<visible>0</visible>
+	</cardSet>
+	<cardSet>
+		<id>6000</id>
+		<name>Event Mission Cards</name>
+		<icon>RewardSetIcon</icon>
+		<visible>0</visible>
+	</cardSet>
+	<cardSet>
+		<id>7000</id>
+		<name>Commanders</name>
+		<icon>CommanderSetIcon</icon>
+		<visible>1</visible>
+	</cardSet>
+	<cardSet>
+		<id>8000</id>
+		<name>Fortress</name>
+		<icon>CommanderSetIcon</icon>
+		<visible>0</visible>
+	</cardSet>
+	<cardSet>
+		<id>9000</id>
+		<name>Promotion</name>
+		<icon>CommanderSetIcon</icon>
+		<visible>1</visible>
+	</cardSet>
+	<cardSet>
+		<id>9999</id>
+		<name>waitlisted</name>
+		<icon>RaiderSetIcon</icon>
+		<visible>0</visible>
+	</cardSet>
+</root>

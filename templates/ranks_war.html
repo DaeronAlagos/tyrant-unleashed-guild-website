@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}War Ranks{% endblock %}
+
+{% block body_block %}
+
+    <section class="page-header page-header-xs">
+        <div class="container">
+
+            <h1>WAR RANKS</h1>
+
+            <!-- breadcrumbs -->
+            <ol class="breadcrumb">
+                <li><a href="/">Home</a></li>
+                <li>Guild Rankings</li>
+                <li class="active">War Ranks</li>
+            </ol><!-- /breadcrumbs -->
+
+        </div>
+    </section>
+    <!-- /PAGE HEADER -->
+
+    <section>
+        <div class="container">
+
+        <div class="heading-title heading-line-single">
+            <h2>Ranks</h2>
+        </div>
+
+            <div class="heading-title heading-border-bottom">
+                <h3>War of the Fallen</h3>
+            </div>
+
+            <div class="row">
+
+                <div class="col-md-3">
+
+                    <div class="box-static box-border-top">
+                        <div class="box-title">
+                            <h4>Top Performers</h4>
+                        </div>
+                        <p>A special shout out to the top performers during the War of the Fallen.</p>
+                        <p><small>Extra credit to Zeckett for always being there to select a BGE, get some sleep dude.</small></p>
+                    </div>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <div class="box-flip box-color box-icon box-icon-center box-icon-round box-icon-large text-center">
+                        <div class="front">
+                            <div class="box1" style="background-color:#a0ce4e;">
+                                <div class="box-icon-title">
+                                    <i class="fa fa-usd"></i>
+                                    <h2>Most Valuable Player</h2>
+                                </div>
+                                <p>Award for the player with the highest overall win/loss score. The man to beat next time.</p>
+                            </div>
+                        </div>
+
+                        <div class="back">
+                            <div class="box2" style="background-color:#a0ce4e;">
+                                <h4>MANESERO</h4>
+                                <hr />
+                                <p>Winner by a slim margin, due to best overall defensive win rate.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <div class="box-flip box-color box-icon box-icon-center box-icon-round box-icon-large text-center">
+                        <div class="front">
+                            <div class="box1" style="background-color:#cb9536;">
+                                <div class="box-icon-title">
+                                    <i class="fa fa-thumbs-o-down"></i>
+                                    <h2>Worst Performer</h2>
+                                </div>
+                                <p>Award for the overall worst performer. This player needs to ask for help with sims next time.</p>
+                            </div>
+                        </div>
+
+                        <div class="back">
+                            <div class="box2" style="background-color:#cb9536;">
+                                <h4>DaeronAlagos</h4>
+                                <hr />
+                                <p>The account owner may how to code, but does he know how to play.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <div class="box-flip box-color box-icon box-icon-center box-icon-round box-icon-large text-center">
+                        <div class="front">
+                            <div class="box1" style="background-color:#73b9dc;">
+                                <div class="box-icon-title">
+                                    <i class="fa fa-spoon"></i>
+                                    <h2>Wooden Spoon</h2>
+                                </div>
+                                <p>This award goes to the player who forgot there was a war on. Lowest number of actual attacks.</p>
+                            </div>
+                        </div>
+
+                        <div class="back">
+                            <div class="box2" style="background-color:#73b9dc;">
+                                <h4>DBRCottonBalls</h4>
+                                <hr />
+                                <p>So bad that he even forgot to pick up some beers from the store, which is where he must have spent most of the war.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="divider"><!-- divider --></div>
+
+            <div class="row">
+
+                <!-- tabs -->
+                <div class="col-md-2 col-sm-2 nopadding">
+                    <ul class="nav nav-tabs nav-stacked">
+                        <li class="in active">
+                            <a href="#totals" data-toggle="tab" class="size-12">
+                                Totals
+                            </a>
+                        </li>
+                        {% for war in war_data %}
+                        <li>
+                            <a href="#{{ war.enemy }}" data-toggle="tab" class="size-12">
+                                vs {{ war.enemy }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- tabs content -->
+                <div class="col-md-10 col-sm-10 nopadding">
+                    <div class="tab-content tab-stacked">
+                        <div id="totals" class="tab-pane in active">
+                            <h4>Totals</h4>
+                            <canvas class="chartjs" id="barChartCanvas_Totals" width="547" height="300"></canvas>
+
+                        </div>
+                        {% for war in war_data %}
+                        <div id="{{ war.enemy }}" class="tab-pane">
+                            <h4>vs {{ war.enemy }}</h4>
+                            <canvas class="chartjs" id="barChartCanvas_{{ war.enemy }}" width="547" height="300"></canvas>
+                        </div>
+                        {% endfor %}
+
+                    </div>
+                </div>
+
+            </div>
+
+
+
+        </div>
+    </section>
+
+
+
+{% endblock %}
+
+{% block script_block %}
+
+    <!-- PAGE LEVEL SCRIPTS -->
+    <script type="text/javascript" src="{% static "plugins/chart.chartjs/Chart.min.js" %}"></script>
+
+    <script type="text/javascript">
+
+                var barChartCanvas_Totals = {
+                    labels: ["-(Rob-)-","ACP4","AlmightyZeus","bahrens","BalticDemon","bargamlot911","Base3Systems","Boingo","btbushi","connor2k","d0ct0rw0rm","DaeronAlagos","daywalka16","DBRCottonballs","Deathstar61","foldz12","gger","Gordi0809","Gracyon","he_he24151","hoyeejian","hyeonugi","Jeita","jenny irashi","jester2021","jester2022","JonathanP282","Kaos1110","Kodon","Manesero","Mir602","miserykim","mizerka","Obsydian114","onizakuma","pajammyjam","paulojfmota","QElvisQ","rogerawong","ru5hm0on","Ryukai_san","SimonDK","Strateken","Tandosil","the_big_e_88","TylerY35","Whyve$","yoyoamigo","ZezeV","ZLOAF"],
+                    datasets: [
+                        {
+                            label: "Offense Win %",
+                            fillColor: "rgba(7,228,51,0.5)",
+                            strokeColor: "rgba(7,228,51,1)",
+                            pointColor: "rgba(220,220,220,1)",
+                            pointStrokeColor: "#fff",
+                            pointHighlightFill: "#fff",
+                            pointHighlightStroke: "rgba(220,220,220,1)",
+                            data: [42.5,62.0,41.6,64.8,63.2,54.6,53.2,65.4,60.9,43.8,55.9,58.9,60.7,58.6,61.3,63.0,58.8,67.7,41.8,67.5,46.8,73.4,65.5,47.9,58.0,75.5,70.2,48.0,53.2,71.4,55.9,62.0,60.4,50.4,40.4,57.3,48.9,63.2,59.8,64.5,67.1,42.3,73.0,40.4,66.8,63.2,65.9,60.9,68.2,63.4]
+                        },
+                        {
+                            label: "Defense Win %",
+                            fillColor: "rgba(217,69,69,0.5)",
+                            strokeColor: "rgba(217,69,69,1)",
+                            pointColor: "rgba(151,187,205,1)",
+                            pointStrokeColor: "#fff",
+                            pointHighlightFill: "#fff",
+                            pointHighlightStroke: "rgba(151,187,205,1)",
+                            data: [37.3,47.2,48.4,44.5,51.7,35.1,46.0,51.0,40.1,51.3,29.3,48.8,49.5,21.0,51.5,46.4,58.3,66.2,68.8,63.9,44.2,56.5,53.0,37.1,39.5,55.4,43.7,28.2,45.8,70.7,42.9,48.5,46.4,49.5,36.7,34.1,35.6,61.0,50.7,51.4,50.2,35.3,52.3,44.0,52.8,49.7,47.7,42.4,57.9,49.3]
+                        }
+                    ]
+                };
+                // lineChartCanvas
+                var ctx1 = document.getElementById("barChartCanvas_Totals").getContext("2d");
+                new Chart(ctx1).Bar(barChartCanvas_Totals, {multiTooltipTemplate: "<%= value %>%"});
+
+        {% for war in war_data %}
+            $('a[href=#{{ war.enemy }}]').on('shown.bs.tab', function() {
+                var barChartCanvas_{{ war.enemy }} = {
+                    labels: [
+                        {% for player in war.data %}
+                        "{{ player.member_name }}",
+                        {% endfor %}
+                    ],
+                    datasets: [
+                        {
+                            label: "Offense Win %",
+                            fillColor: "rgba(7,228,51,0.5)",
+                            strokeColor: "rgba(7,228,51,1)",
+                            pointColor: "rgba(220,220,220,1)",
+                            pointStrokeColor: "#fff",
+                            pointHighlightFill: "#fff",
+                            pointHighlightStroke: "rgba(220,220,220,1)",
+                            data: [
+                                {% for player in war.data %}
+                                    {{ player.win_percent }},
+                                    {% endfor %}
+                            ]
+                        },
+                        {
+                            label: "Defense Win %",
+                            fillColor: "rgba(217,69,69,0.5)",
+                            strokeColor: "rgba(217,69,69,1)",
+                            pointColor: "rgba(151,187,205,1)",
+                            pointStrokeColor: "#fff",
+                            pointHighlightFill: "#fff",
+                            pointHighlightStroke: "rgba(151,187,205,1)",
+                            data: [
+                                {% for player in war.data %}
+                                    {{ player.defense_percent }},
+                                    {% endfor %}
+                            ]
+                        }
+                    ]
+                };
+                // lineChartCanvas
+                var ctx1 = document.getElementById("barChartCanvas_{{ war.enemy }}").getContext("2d");
+                new Chart(ctx1).Bar(barChartCanvas_{{ war.enemy }}, {multiTooltipTemplate: "<%= value %>%"});
+            });
+        {% endfor %}
+
+    </script>
+
+{% endblock %}

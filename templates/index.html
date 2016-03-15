@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block body_block %}
+			<!--
+				SLIDER
+
+				.height-300
+				.height-350
+				.height-400
+				.height-450
+				.height-500
+				.height-550
+				.height-600
+				.height-650
+				.height-700
+				.height-750
+				.height-800
+			-->
+			<section class="height-500" id="slider" style="background:url({% static 'images/home-splash.jpg' %})">
+				<div class="overlay dark-6"><!-- dark overlay [0 to 9 opacity] --></div>
+
+				<div class="display-table">
+					<div class="display-table-cell vertical-align-middle">
+
+						<div class="container text-center">
+
+							<h1 class="nomargin wow fadeInUp" data-wow-delay="0.4s">
+								WE ARE
+								<!--
+									TEXT ROTATOR
+									data-animation="fade|flip|flipCube|flipUp|spin"
+								-->
+								<span class="rotate " data-animation="fade" data-speed="1500">
+									MASTER JEDIS, RECRUITING, JEDI KNIGHTS
+								</span>
+							</h1>
+
+							<p class="lead font-lato size-30 wow fadeInUp" data-wow-delay="0.7s">
+								A Tyrant Unleashed Guild since the beginning!
+															</p>
+
+							<a class="btn btn-default btn-lg" href="{% url 'register' %}">JOIN NOW</a>
+
+						</div>
+
+					</div>
+				</div>
+
+			</section>
+			<!-- /SLIDER -->
+
+    			<!-- -->
+			<section>
+				<div class="container">
+
+					<!-- FEATURED BOXES 3 -->
+					<div class="row">
+						<div class="col-md-3 col-xs-6 margin-bottom-30">
+							<div class="text-center">
+								<figure class="box-shadow-8">
+                                    <img class="img-responsive" src="{% static 'images/masterjedis.jpg' %}" alt="" />
+                                </figure>
+								<h4>Master Jedis</h4>
+								<p>MasterJedis was formed by Connor2k on the first day guilds went live in Tyrants Unleashed. Since that time, we have remained a top 25 team.</p>
+							</div>
+						</div>
+
+						<div class="col-md-3 col-xs-6 margin-bottom-30">
+							<div class="text-center">
+								<figure class="box-shadow-8">
+                                    <img class="img-responsive" src="{% static 'images/jediknights.jpg' %}" alt="" />
+                                </figure>
+								<h4>Jedi Knights</h4>
+								<p>Jedi Knights was formed as a way to get new recruits into MasterJedis and help new players to grow. They started out as an unranked guild going into their first Guild war and have finished 114, 92 and then 65, getting them an elite spot on the most improved guild on the forums.</p>
+							</div>
+						</div>
+
+						<div class="col-md-3 col-xs-6 margin-bottom-30">
+							<div class="text-center">
+								<figure class="box-shadow-8">
+                                    <img class="img-responsive" src="{% static 'images/jedirecruits.jpg' %}" alt="" />
+                                </figure>
+								<h4>Jedi Recruits</h4>
+								<p>To be considered for the Jedi Family, you must contact Enoch or Zeckett on the LINE app from Naver Japan.</p>
+							</div>
+						</div>
+
+						<div class="col-md-3 col-xs-6 margin-bottom-30">
+							<div class="text-center">
+								<figure class="box-shadow-8">
+                                    <img class="img-responsive" src="{% static 'images/jedievents.jpg' %}" alt="" />
+                                </figure>
+								<h4>Events</h4>
+								<p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus.</p>
+							</div>
+						</div>
+					</div>
+					<!-- /FEATURED BOXES 3 -->
+
+				</div>
+			</section>
+			<!-- / -->
+
+{% endblock %}

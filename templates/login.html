@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}Login{% endblock %}
+
+{% block body_block %}
+
+    			<!--
+				PAGE HEADER
+
+				CLASSES:
+					.page-header-xs	= 20px margins
+					.page-header-md	= 50px margins
+					.page-header-lg	= 80px margins
+					.page-header-xlg= 130px margins
+					.dark			= dark page header
+
+					.shadow-before-1 	= shadow 1 header top
+					.shadow-after-1 	= shadow 1 header bottom
+					.shadow-before-2 	= shadow 2 header top
+					.shadow-after-2 	= shadow 2 header bottom
+					.shadow-before-3 	= shadow 3 header top
+					.shadow-after-3 	= shadow 3 header bottom
+			-->
+			<section class="page-header page-header-xs">
+				<div class="container">
+
+					<h1>LOGIN</h1>
+
+					<!-- breadcrumbs -->
+					<ol class="breadcrumb">
+						<li><a href="#">Home</a></li>
+						<li><a href="#">Pages</a></li>
+						<li class="active">Login</li>
+					</ol><!-- /breadcrumbs -->
+
+				</div>
+			</section>
+			<!-- /PAGE HEADER -->
+
+
+
+
+			<!-- -->
+			<section>
+				<div class="container">
+
+					<div class="row">
+
+						<div class="col-md-6 col-md-offset-3">
+
+                            {% if disabled %}
+
+                                <!-- ALERT -->
+                                <div class="alert alert-mini alert-warning margin-bottom-30">
+                                    {{ disabled }}
+                                </div>
+                                <!-- /ALERT -->
+
+                            {% elif invalid_login %}
+
+                                <!-- ALERT -->
+                                <div class="alert alert-mini alert-danger margin-bottom-30">
+                                    {{ invalid_login }}
+                                </div>
+                                <!-- /ALERT -->
+
+                            {% endif %}
+
+							<div class="box-static box-border-top padding-30">
+								<div class="box-title margin-bottom-30">
+									<h2 class="size-20">Sign In</h2>
+								</div>
+
+								<form class="nomargin" role="form" method="post" action="{% url 'login' %}" autocomplete="off">
+                                    {% csrf_token %}
+									<div class="clearfix">
+
+										<!-- Email -->
+										<div class="form-group">
+											<input type="text" name="username" class="form-control" placeholder="Username" id="id_username" maxlength="30" required autofocus="">
+										</div>
+
+										<!-- Password -->
+										<div class="form-group">
+											<input type="password" name="password" class="form-control" placeholder="Password" id="id_password" required>
+										</div>
+
+									</div>
+
+									<div class="row">
+
+										<div class="col-md-6 col-sm-6 col-xs-6">
+
+											<!-- Inform Tip -->
+											<div class="form-tip pt-20">
+												<a class="no-text-decoration size-13 margin-top-10 block" href="#">Forgot Password?</a>
+											</div>
+
+										</div>
+
+										<div class="col-md-6 col-sm-6 col-xs-6 text-right">
+
+											<button class="btn btn-primary" type="submit" value="Submit">LOG IN</button>
+
+										</div>
+
+									</div>
+
+								</form>
+
+							</div>
+
+							<div class="margin-top-30 text-center">
+								<a href="{% url 'register' %}"><strong>Create Account</strong></a>
+
+							</div>
+
+						</div>
+					</div>
+
+				</div>
+			</section>
+			<!-- / -->
+
+{% endblock %}

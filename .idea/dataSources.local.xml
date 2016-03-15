@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="dataSourceStorageLocal">
+    <data-source name="JediGuild" uuid="e8e4bbcc-ea52-4f56-be48-f4eaf7fb6e61">
+      <user-name>jediguild</user-name>
+      <user-password>dfd9dfe8dffedfd9dfd2dffedffadfc0df80dfeadfc5df98</user-password>
+      <schema-pattern>jediguild.pg_catalog jediguild.public</schema-pattern>
+      <default-schemas>jediguild.public</default-schemas>
+    </data-source>
+  </component>
+</project>

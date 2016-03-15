@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}Register{% endblock %}
+
+{% block body_block %}
+
+    			<!--
+				PAGE HEADER
+
+				CLASSES:
+					.page-header-xs	= 20px margins
+					.page-header-md	= 50px margins
+					.page-header-lg	= 80px margins
+					.page-header-xlg= 130px margins
+					.dark			= dark page header
+
+					.shadow-before-1 	= shadow 1 header top
+					.shadow-after-1 	= shadow 1 header bottom
+					.shadow-before-2 	= shadow 2 header top
+					.shadow-after-2 	= shadow 2 header bottom
+					.shadow-before-3 	= shadow 3 header top
+					.shadow-after-3 	= shadow 3 header bottom
+			-->
+			<section class="page-header page-header-xs">
+				<div class="container">
+
+					<h1>REGISTER</h1>
+
+					<!-- breadcrumbs -->
+					<ol class="breadcrumb">
+						<li><a href="/">Home</a></li>
+						<li class="active">Register</li>
+					</ol><!-- /breadcrumbs -->
+
+				</div>
+			</section>
+			<!-- /PAGE HEADER -->
+
+    <!-- -->
+			<section>
+				<div class="container">
+
+					<div class="row">
+
+						<!-- LOGIN -->
+						<div class="col-md-6 col-md-offset-3">
+
+                            {% if user_form.errors %}
+
+                                <div class="alert alert-danger margin-bottom-30"><!-- DANGER -->
+                                    <ul>
+                                    {% for field in user_form %}
+                                        {% if field.errors %}
+                                            <li>{{ field.errors|striptags }}</li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    </ul>
+                                </div>
+
+                            {% endif %}
+
+                            {% if registered %}
+
+                                <!-- ALERT -->
+                                <div class="alert alert-mini alert-warning margin-bottom-30">
+                                    {{ register_success }}
+                                </div>
+                                <!-- /ALERT -->
+
+                            {% else %}
+
+							<!-- register form -->
+							<form class="nomargin sky-form boxed" role="form" action="{% url 'register' %}" method="post">
+                                {% csrf_token %}
+
+
+
+								<header>
+									<i class="fa fa-users"></i> Register
+                                </header>
+
+                                <fieldset class="nomargin">
+
+                                    <label class="input margin-bottom-10" for="id_username">
+										<i class="ico-append fa fa-user"></i>
+										<input type="text" placeholder="Username" name="username" id="id_username" maxlength="30">
+										<b class="tooltip tooltip-bottom-right">Suggested to be the same as your LINE ID</b>
+									</label>
+
+									<label class="input margin-bottom-10" for="id_password">
+										<i class="ico-append fa fa-lock"></i>
+										<input id="id_password" name="password" type="password" placeholder="Password">
+										<b class="tooltip tooltip-bottom-right">Only latin characters and numbers</b>
+									</label>
+
+                                </fieldset>
+
+								<div class="row margin-bottom-20">
+									<div class="col-md-12">
+										<button type="submit" name="submit" value="Register" class="btn btn-primary"><i class="fa fa-check"></i> REGISTER</button>
+									</div>
+								</div>
+
+							</form>
+							<!-- /register form -->
+
+                            {% endif %}
+
+						</div>
+						<!-- /LOGIN -->
+
+					</div>
+
+
+				</div>
+			</section>
+    <!-- / -->
+
+
+{% endblock %}

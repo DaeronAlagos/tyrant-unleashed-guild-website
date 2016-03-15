@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}Benchmarks{% endblock %}
+
+{% block body_block %}
+
+    <section class="page-header page-header-xs">
+        <div class="container">
+
+            <h1>BENCHMARKS</h1>
+
+            <!-- breadcrumbs -->
+            <ol class="breadcrumb">
+                <li><a href="/">Home</a></li>
+                <li>Guild Rankings</li>
+                <li class="active">Benchmarks</li>
+            </ol><!-- /breadcrumbs -->
+
+        </div>
+    </section>
+    <!-- /PAGE HEADER -->
+
+    <section>
+        <div class="container">
+
+        <h4>Benchmarks</h4>
+            {% if benchmark_decks %}
+
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover" id="sample_1">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Name</th> <!-- class="width-30" -->
+                                <th>Guild</th>
+                                <th>Deck</th>
+                                <th>Score</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for benchmark_deck in benchmark_decks %}
+                            <tr>
+                                <td class="size-11"></td>
+                                <td class="size-11">{{ benchmark_deck.deck.name }}</td>
+                                <td class="size-11">{{ benchmark_deck.deck.guild }}</td>
+                                <td class="size-11">{{ benchmark_deck.deck.deck }}</td>
+                                <td class="size-11">{{ benchmark_deck.score }}</td>
+                                <td class="size-11">{{ benchmark_deck.date|date:"d/m/Y" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            {% else %}
+
+                <div class="alert alert-danger margin-bottom-30"><!-- DANGER -->
+                    <strong>Oh snap!</strong> There are no decks to show!
+                </div>
+
+            {% endif %}
+
+
+        </div>
+    </section>
+
+
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+{% load filters %}
+
+{% block title %}Decks{% endblock %}
+
+{% block body_block %}
+
+    <section class="page-header page-header-xs">
+        <div class="container">
+
+            <h1>DECKS</h1>
+
+            <!-- breadcrumbs -->
+            <ol class="breadcrumb">
+                <li><a href="/">Home</a></li>
+                <li>{{ user.get_username }}</li>
+                <li class="active">Decks</li>
+            </ol><!-- /breadcrumbs -->
+
+        </div>
+    </section>
+    <!-- /PAGE HEADER -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="col-lg-12 col-md-12 col-sm-9 margin-bottom-80">
+
+                <div class="toggle toggle-transparent-body toggle-accordion">
+
+                    {% if accounts %}
+
+                        {% for account in accounts %}
+
+                            <div class="toggle">
+                                <label>{{ account }}</label>
+                                <div class="toggle-content">
+
+                                {% if account|is_in:decks %}
+
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped table-condensed">
+                                            <thead>
+                                                <tr>
+                                                    <th>Deck</th>
+                                                    <th>Mode</th>
+                                                    <th>Type</th>
+                                                    <th>BGE</th>
+                                                    <th>Friendly Structures</th>
+                                                    <th>Enemy Structures</th>
+                                                    <th>Updated</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+
+                                                {% for deck in decks %}
+                                                    {% if deck.name == account %}
+                                                <tr>
+                                                    <td class="width-300">{{ deck.deck }}</td>
+                                                    <td>{{ deck.mode }}</td>
+                                                    <td>{{ deck.type }}</td>
+                                                    <td>{{ deck.bge }}</td>
+                                                    <td>{{ deck.friendly_structures }}</td>
+                                                    <td>{{ deck.enemy_structures }}</td>
+                                                    <td class="width-150">{{ deck.date|date:"d/m/Y" }} {{ deck.date|date:"H:i" }}</td>
+                                                </tr>
+                                                    {% endif %}
+                                                {% endfor %}
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                {% else %}
+                                    <div class="alert alert-danger margin-bottom-30"><!-- DANGER -->
+                                        <strong>Oh snap!</strong> You haven't added any decks yet!
+                                    </div>
+                                {% endif %}
+
+                                </div>
+                            </div>
+
+                        {% endfor %}
+
+                    {% else %}
+
+                        <div class="alert alert-danger margin-bottom-30"><!-- DANGER -->
+                            <strong>Oh snap!</strong> You don't have any game accounts added yet!
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+                <div class="divider"><!-- divider --></div>
+
+                <div class="panel panel-success">
+                    <div class="panel-heading">
+                        <h2 class="panel-title bold">Add Deck</h2>
+                    </div>
+
+                    <div class="panel-body">
+
+                        <form role="form" id="deck_form" action="{% url 'user_decks' %}" method="post">
+                        {% csrf_token %}
+                            <fieldset>
+
+                                {{ add_deck_form }}
+
+                            </fieldset>
+
+                        <div>
+                            <button type="submit" value="Submit" name="add_deck" class="btn btn-success">Add Deck</button>
+                        </div>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+{% endblock %}

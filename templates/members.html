@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+{% load filters %}
+
+{% block title %}Members{% endblock %}
+
+{% block body_block %}
+
+    <!--
+        PAGE HEADER
+
+        CLASSES:
+            .page-header-xs	= 20px margins
+            .page-header-md	= 50px margins
+            .page-header-lg	= 80px margins
+            .page-header-xlg= 130px margins
+            .dark			= dark page header
+
+            .shadow-before-1 	= shadow 1 header top
+            .shadow-after-1 	= shadow 1 header bottom
+            .shadow-before-2 	= shadow 2 header top
+            .shadow-after-2 	= shadow 2 header bottom
+            .shadow-before-3 	= shadow 3 header top
+            .shadow-after-3 	= shadow 3 header bottom
+    -->
+    <section class="page-header page-header-xs">
+        <div class="container">
+
+            <h1>MEMBERS</h1>
+
+            <!-- breadcrumbs -->
+            <ol class="breadcrumb">
+                <li><a href="/">Home</a></li>
+                <li><a href="#">Officers</a></li>
+                <li class="active">Members</li>
+            </ol><!-- /breadcrumbs -->
+
+        </div>
+    </section>
+    <!-- /PAGE HEADER -->
+
+    <!-- -->
+    <section>
+        <div class="container">
+
+            <h4>Members</h4>
+            {% if users %}
+            <div class="table-responsive">
+						<table class="table table-bordered table-striped table-vertical-middle">
+							<thead>
+								<tr>
+									<th>User</th> <!-- class="width-30" -->
+									<th class="width-200">Is Enabled</th>
+									<th class="width-200">Is Officer</th>
+                                    <th class="width-200">Can Use Force</th>
+								</tr>
+							</thead>
+							<tbody>
+                                {% for user in users %}
+								<tr>
+									<td>{{ user.username }}</td>
+									<td class="text-center">
+                                        <form role="form" method="post" id="is_active_form" action="{% url 'members' %}" class="margin-bottom-0">
+                                            {% csrf_token %}
+
+                                            <label class="switch switch-primary">
+                                                <!-- {{ is_active_form.is_active }} -->
+                                                <input id="id_is_active-is_active" name="is_active-is_active" type="checkbox" {% if user.is_active %}checked{% endif %}>
+                                                <span class="switch-label" data-on="YES" data-off="NO"></span>
+                                            </label>
+                                        </form>
+                                    </td>
+									<td class="text-center">
+                                        <form role="form" method="post" id="is_officer_form" action="{% url 'members' %}" class="margin-bottom-0">
+                                            {% csrf_token %}
+
+                                            <label class="switch switch-primary">
+                                                <input id="id_is_officer-is_officer" name="is_officer-is_officer" type="checkbox" {% if user|has_group:"Officers" %}checked{% endif %}>
+                                                <span class="switch-label" data-on="YES" data-off="NO"></span>
+                                            </label>
+                                        </form>
+                                    </td>
+                                    <td class="text-center">
+                                        <form role="form" method="post" id="has_force_form" action="{% url 'members' %}" class="margin-bottom-0">
+                                            {% csrf_token %}
+
+                                            <label class="switch switch-primary">
+                                                <input id="id_has_force-has_force" name="has_force-has_force" type="checkbox" {% if user|has_group:"Force" %}checked{% endif %}>
+                                                <span class="switch-label" data-on="YES" data-off="NO"></span>
+                                            </label>
+                                        </form>
+                                    </td>
+								</tr>
+                                {% endfor %}
+							</tbody>
+						</table>
+					</div>
+            {% else %}
+                <div class="alert alert-danger margin-bottom-30"><!-- DANGER -->
+                    <strong>Oh snap!</strong> There are no members to show!
+                </div>
+
+            {% endif %}
+        </div>
+    </section>
+
+{% endblock %}
