@@ -171,7 +171,7 @@
 												</a>
 											</li>
 											<li>
-												<a href="#">
+												<a href="{% url 'ranks_brawl' %}">
 													BRAWL
 												</a>
 											</li>
@@ -184,10 +184,17 @@
 										</a>
 
 									</li>
-									<li class="dropdown mega-menu"><!-- CONQUEST -->
+									<li class="dropdown"><!-- CONQUEST -->
 										<a class="dropdown-toggle" href="#">
 											CONQUEST
 										</a>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a href="{% url 'conquest_overview' %}">
+                                                    OVERVIEW
+                                                </a>
+                                            </li>
+                                        </ul>
 
 									</li>
 

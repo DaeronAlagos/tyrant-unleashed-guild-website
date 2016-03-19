@@ -16,6 +16,10 @@ def is_officer(user):
     return user.groups.filter(name='Officers').exists()
 
 
+def is_force_user(user):
+    return user.groups.filter(name='Force').exists()
+
+
 def index(request):
     return render(request, "index.html", {})
 
@@ -420,10 +424,16 @@ def ranks_war(request):
     for war in war_data:
 
         for player in war['data']:
-            player.update({'win_percent': float(player['wins']) / 20 * 100})
+            player.update({'win_percent': round(float(player['wins']) / 20 * 100, 1)})
             player.update({'defense_percent': round(float(player['defense_wins']) / int(player['defense_losses']) * 100, 1)})
 
     return render(request, "ranks_war.html", {'war_data': war_data})
+
+
+@login_required
+def ranks_brawl(request):
+
+    return render(request, "ranks_brawl.html", {})
 
 
 @login_required
@@ -549,6 +559,7 @@ def deckslist(request):
 
 
 @api_view(['GET', ])
+@user_passes_test(is_force_user)
 def force_auth(request):
 
     if request.method == 'GET':

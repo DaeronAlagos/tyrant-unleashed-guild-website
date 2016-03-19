@@ -43,7 +43,7 @@ class GameAccount(models.Model):
 class Decks(models.Model):
 
     name = models.CharField(max_length=30)
-    guild = models.CharField(max_length=30)
+    guild = models.CharField(max_length=30, blank=True)
     deck = JSONField()
     mode = models.CharField(max_length=30)
     type = models.CharField(max_length=30)

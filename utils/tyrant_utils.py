@@ -188,6 +188,18 @@ class AccountDetails(object):
         print "Time to get cards: ", get_cards_end - get_cards_start
         return self.card_list
 
+    def get_brawl_status(self, postdata):
+
+        tyrant_api = TyrantAPI()
+        response_data = tyrant_api.create_request('init', postdata)
+        print "Response Data:", response_data
+
+        brawl_rank = {'brawl_name': response_data['user_data']['name']}
+        for key, value in response_data['player_brawl_data'].iteritems():
+            brawl_rank[key] = value
+
+        return brawl_rank
+
 
 class CardReader(object):
 

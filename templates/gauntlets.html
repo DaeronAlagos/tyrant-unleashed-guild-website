@@ -22,6 +22,30 @@
     </section>
     <!-- /PAGE HEADER -->
 
+    <section class="info-bar info-bar-clean">
+        <div class="container">
+
+            {% if decks %}
+
+            <div class="row">
+
+                {% for commander, count in commander_dict.items %}
+
+                    <div class="col-md-2 col-sm-2">
+                        <p>
+                            {{ commander }}: <span class="countTo" data-speed="3000">{{ count }}</span>%
+                        </p>
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% endif %}
+
+        </div>
+    </section>
+
     <section>
         <div class="container">
 
@@ -29,20 +53,7 @@
 
             {% if decks %}
 
-                <div class="row">
 
-                    {% for commander, count in commander_dict.items %}
-
-                        <div class="col-md-2 col-sm-2">
-                            <p>
-                                {{ commander }}: <span class="countTo font-raleway" data-speed="3000">{{ count }}</span>
-                            </p>
-                        </div>
-
-                    {% endfor %}
-
-
-                </div>
 
                 <div class="table-responsive">
                     <table class="table table-striped table-bordered table-hover" id="sample_1">
@@ -154,6 +165,18 @@
                         }]
                     }
                 });
+
+                table.columns().every( function () {
+                    var that = this;
+
+                    $( 'input', this.footer() ).on( 'keyup change', function () {
+                        if ( that.search() !== this.value ) {
+                            that
+                                .search( this.value )
+                                .draw();
+                        }
+                    } );
+                } );
 
                 var tableWrapper = jQuery('#sample_1_wrapper'); // datatable creates the table wrapper by adding with id {your_table_jd}_wrapper
 
