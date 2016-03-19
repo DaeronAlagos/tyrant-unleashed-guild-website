@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}Brawl Ranks{% endblock %}
+
+{% block body_block %}
+
+    <section class="page-header page-header-xs">
+        <div class="container">
+
+            <h1>BRAWL RANKS</h1>
+
+            <!-- breadcrumbs -->
+            <ol class="breadcrumb">
+                <li><a href="/">Home</a></li>
+                <li>Guild Rankings</li>
+                <li class="active">Brawl Ranks</li>
+            </ol><!-- /breadcrumbs -->
+
+        </div>
+    </section>
+    <!-- /PAGE HEADER -->
+
+    <section>
+
+        <div class="container">
+
+            <h4>Brawl Ranks</h4>
+
+            <div class="table table-responsive">
+                <table class="table table-bordered table-striped table-vertical-middle">
+                    <thead>
+                        <tr>
+                            <th>Name</th> <!-- class="width-30" -->
+                            <th>Rank</th>
+                            <th>Wins</th>
+                            <th>Losses</th>
+                            <th>Points</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for account in accounts %}
+                            <tr>
+                                <td>{{ account.name }}</td>
+                                <td>{{ account.brawl_rank }}</td>
+                                <td>{{ account.brawl_wins }}</td>
+                                <td>{{ account.brawl_losses }}</td>
+                                <td>{{ account.brawl_score }}</td>
+                            </tr>
+
+
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+
+
+            </div>
+
+        </div>
+
+
+    </section>
+
+
+{% endblock %}
