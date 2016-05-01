@@ -1,0 +1,16 @@
+<div class="table-responsive">
+    <table class="table size-11">
+    <tbody>
+        {% for account in account_data %}
+        <tr>
+            <td class="size-14">{{ account.name }}</td>
+            <td><div class="progress">
+	<div class="progress-bar" role="progressbar" aria-valuenow="{{ account.stamina }}" aria-valuemin="0" aria-valuemax="25" style="width: {{ account.stamina }}%; min-width: 2em;">
+		{{ account.stamina }}
+	</div>
+</div></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+</div>

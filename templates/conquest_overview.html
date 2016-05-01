@@ -21,136 +21,72 @@
         </div>
     </section>
     <!-- /PAGE HEADER -->
-<section class="nopadding">
-<div class="container">
 
-        <div class="callout alert alert-border margin-top-60 margin-bottom-60">
-
-            <div class="row">
-
-                <div class="col-md-8 col-sm-8"><!-- left text -->
-                    <h4>Time until next update</h4>
-                </div><!-- /left text -->
-
-                <div class="col-md-4 col-sm-4 text-right"><!-- right btn -->
-                    <div class="countdown countdown-md" data-from="March 19, 2016 19:45:00"></div>
-                </div><!-- /right btn -->
-
-            </div>
-
-        </div>
-</div>
-</section>
+    {% if zone_data %}
 
     <section class="info-bar info-bar-clean">
         <div class="container">
 
-            {% for zone in zones %}
-
             <div class="row">
 
-                <div class="col-sm-2">
-                    <h2 class="text-center">{{ zone.name }}</h2>
-                    <figure class="box-shadow-8">
-                        <img class="img-responsive" src="{% static "images/conquest/" %}{{ zone.image }}" alt="{{ zone.name }}" />
-                    </figure>
-                    <p class="margin-top-10"><strong>{{ zone.bge }}</strong></p>
+                {% for zone, data in zone_data.items %}
+
+                <div class="col-sm-3">
+                    <h4 class="text-center padding-3">{{ zone }}<a href="{% url 'command' %}" class="btn btn-xs btn-danger" data-toggle="modal" data-target="#myModal">Attack</a></h4>
+                <div class="table-responsive">
+                <table class="table size-11">
+                <tbody>
+                    {% for guild in data|dictsortreversed:"influence" %}
+                    <tr>
+                        <td class="bold">{{ guild.rank }}</td>
+                        <td>{{ guild.influence }}</td>
+                        <td class="text-right"> {{ guild.name }}
+                            {% if 'MasterJedis' in guild.name %}<span class="badge badge-green">&nbsp;</span>{% elif guild.name in enemy_guilds %}<span class="badge badge-red">&nbsp;</span>{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                </table>
+                </div>
                 </div>
 
-                <div class="col-sm-10">
-
-                    <div class="table-responsive">
-                        <table class="table display-table" id="">
-                            <thead>
-                                <tr>
-                                    <th class="width-100">Rank</th>
-                                    <th>Guild</th>
-                                    <th>Points</th>
-                                    <th>Next Rank</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>1</td>
-                                    <td>DireTide</td>
-                                    <td>66666</td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td>2</td>
-                                    <td>MasterJedis</td>
-                                    <td>55555</td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td>3</td>
-                                    <td>Quasar</td>
-                                    <td>44444</td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td>4</td>
-                                    <td>Corona</td>
-                                    <td>33333</td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td>5</td>
-                                    <td>AmberGround</td>
-                                    <td>22222</td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td>6</td>
-                                    <td>Prophecy</td>
-                                    <td>11111</td>
-                                    <td></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-
-                </div>
+                {% if forloop.counter|divisibleby:4 %}
 
             </div>
-
-            {% endfor %}
+            <div class="row">
+                {% endif %}
+                {% endfor %}
+            </div>
 
         </div>
     </section>
 
-{% endblock %}
+    {% else %}
 
-{% block script_block %}
+    <section>
 
-    <link href="{% static 'css/layout-datatables.css' %}" rel="stylesheet" type="text/css" />
+        <div class="container">
 
+            <div class="row">
 
-    <!-- JS DATATABLES -->
-    <script type="text/javascript" src="{% static 'plugins/datatables/js/jquery.dataTables.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'plugins/datatables/js/dataTables.tableTools.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'plugins/datatables/js/dataTables.colReorder.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'plugins/datatables/js/dataTables.scroller.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'plugins/datatables/dataTables.bootstrap.js' %}"></script>
-    <script type="text/javascript" src="{% static 'plugins/select2/js/select2.full.min.js' %}"></script>
+                <div class="alert alert-info margin-bottom-30"><!-- WARNING -->
+                    <strong>Notice!</strong> There is no Conquest data available at this time. Please check again soon.
+                </div>
 
-    <script type="text/javascript">
-        $(document).ready(
-            function() {
-                $('table.display-table').DataTable(
-                        {
-                            "scrollY": "150px",
-                            "scrollCollapse": true,
-                            "paging": false,
-                            "bPaginate": false,
-                            "bFilter": false,
-                            "bInfo": false,
-                            "sDom": "t"
-                        }
-                );
-            }
-        );
-    </script>
+            </div>
+
+        </div>
+
+    </section>
+
+    {% endif %}
+
+    <div id="myModal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Content will be loaded here from "remote.php" file -->
+            </div>
+        </div>
+    </div>
 
 {% endblock %}

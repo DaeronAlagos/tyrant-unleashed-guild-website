@@ -101,7 +101,6 @@ class TyrantAPI(object):
     def create_request(self, message, postdata):
 
         postdata_params = urlparse.parse_qs(postdata)
-        # print(postdata_params)
         timestamp = int(time.time())
         self.user_id = int(postdata_params['user_id'][0])
         new_postdata_params = {'password': str(postdata_params['password'][0]),
@@ -121,6 +120,41 @@ class TyrantAPI(object):
                                'os_version': str(self.settings['os_version']),
                                'udid': '',
                                'device_type': str(self.settings['device_type'])
+                               }
+
+        new_postdata = urllib.urlencode(new_postdata_params)
+        url = '{0}?message={1}&user_id='.format(self.TOurl, message, self.user_id)
+        request = urllib2.Request(url, new_postdata, self.header)
+        response = urllib2.urlopen(request)
+        response_data = json.loads(response.read())
+
+        return response_data
+
+    def create_conquest_zone_request(self, message, zone_id, postdata):
+
+        postdata_params = urlparse.parse_qs(postdata)
+        timestamp = int(time.time())
+        self.user_id = int(postdata_params['user_id'][0])
+        new_postdata_params = {'password': str(postdata_params['password'][0]),
+                               'unity': str(self.settings['unity']),
+                               'client_version': str(self.settings['client_version']),
+                               'api_stat_name': 'getConquestZoneTopLeaderboard',
+                               'api_stat_time': '',
+                               'user_id': self.user_id,
+                               'timestamp': timestamp,
+                               # 'hash': self.calculateMD5Hash(timestamp),
+                               # 'syncode': str(postdata_params['syncode'][0]),
+                               'client_version': str(self.settings['client_version']),
+                               'device_type': str(self.settings['device_type']),
+                               'os_version': str(self.settings['os_version']),
+                               'platform': str(self.settings['platform']),
+                               'kong_id': str(postdata_params['kong_id'][0]),
+                               'kong_token': str(postdata_params['kong_token'][0]),
+                               'kong_name': str(postdata_params['kong_name'][0]),
+                               # 'os_version': str(self.settings['os_version']),
+                               # 'udid': '',
+                               # 'device_type': str(self.settings['device_type'])
+                               'zone_id': zone_id
                                }
 
         new_postdata = urllib.urlencode(new_postdata_params)
@@ -199,6 +233,19 @@ class AccountDetails(object):
             brawl_rank[key] = value
 
         return brawl_rank
+
+
+class ConquestUpdate(object):
+
+    def __init__(self):
+        self.tyrant_api = TyrantAPI()
+
+    def getConquestUpdate_data(self, postdata):
+
+        data = self.tyrant_api.create_request('getConquestUpdate', postdata)
+        # print "Data:", data
+
+        return data
 
 
 class CardReader(object):
@@ -301,3 +348,25 @@ class CardReader(object):
         print cards
         for card, qty in cards:
             return
+
+    def bge_to_dict(self, bge):
+
+        # bge_list = add_deck_form['bge'].value()
+        bge_list = bge.split(', ')
+
+        bge_as_dict = {
+            "global": {
+                "global_id": "",
+                "name": str(bge_list[0])
+            },
+            "friendly": {
+                "friendly_id": "",
+                "name": str(bge_list[1])
+            },
+            "enemy": {
+                "enemy_id": "",
+                "name": str(bge_list[2])
+            }
+        }
+
+        return bge_as_dict

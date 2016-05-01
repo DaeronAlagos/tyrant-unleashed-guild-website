@@ -1,16 +1,20 @@
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponseRedirect, HttpResponse
+from django.template.response import TemplateResponse
 from django.shortcuts import render, redirect
+from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.debug import sensitive_post_parameters
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 import utils.tyrant_utils as tyrant_utils
-from jedisite.forms import UserForm, UserProfileForm, GameAccountForm, GameAccountBasicForm, DeckForm, UserIsActiveForm
+from jedisite.forms import UserForm, UserProfileForm, GameAccountForm, GameAccountBasicForm, DeckForm,\
+    UserIsActiveForm, AllowCommandForm, ShowCanvasForm, PasswordChangeForm
 from jedisite.models import GameAccount, User, Decks, ActionLog, Benchmarks, WarStats
 from jedisite.serializers import DecksSerializer, ForceAuthSerializer
-
+from .tasks import benchmark_sim
 
 def is_officer(user):
     return user.groups.filter(name='Officers').exists()
@@ -89,16 +93,30 @@ def user_logout(request):
 
 
 @login_required
+@csrf_protect
+@sensitive_post_parameters('old_password', 'new_password1', 'new_password2')
 def user_settings(request):
 
     try:
         token = Token.objects.filter(user=request.user)
-        #print "Token:", token
 
     except Token.DoesNotExist:
         pass
 
+    if request.method == "POST":
+        password_change_form = PasswordChangeForm(user=request.user, data=request.POST)
+        if password_change_form.is_valid():
+            password_change_form.save()
+            # Updating the password logs out all other sessions for the user
+            # except the current one.
+            update_session_auth_hash(request, password_change_form.user)
+            return render(request, 'user_settings.html', {'token': token,
+                                                          'change_success': "Password changed successfully"})
+    else:
+        password_change_form = PasswordChangeForm(user=request.user)
+
     return render(request, 'user_settings.html', {'token': token,
+                                                  'password_change_form': password_change_form
                                                   })
 
 
@@ -214,6 +232,11 @@ def open_canvas(request):
 @login_required
 def user_accounts(request):
 
+    add_account_form = GameAccountForm(prefix='add_account')
+    add_account_basic_form = GameAccountBasicForm(prefix='add_account_basic')
+    allow_command_form = AllowCommandForm(prefix='allow_command')
+    show_canvas_form = ShowCanvasForm(prefix='show_canvas')
+
     if request.method == 'POST':
 
         if 'add_account' in request.POST:
@@ -237,6 +260,8 @@ def user_accounts(request):
                 return HttpResponseRedirect('/profile/accounts/')
 
             add_account_basic_form = GameAccountBasicForm(prefix='add_account_basic')
+            allow_command_form = AllowCommandForm(prefix='allow_command')
+            show_canvas_form = ShowCanvasForm(prefix='show_canvas')
 
         elif 'add_account_basic' in request.POST:
 
@@ -250,11 +275,50 @@ def user_accounts(request):
                 return HttpResponseRedirect('/profile/accounts/')
 
             add_account_form = GameAccountForm(prefix='add_account')
+            allow_command_form = AllowCommandForm(prefix='allow_command')
+            show_canvas_form = ShowCanvasForm(prefix='show_canvas')
 
-    else:
+        elif 'allow_command' in request.POST:
 
-        add_account_form = GameAccountForm(prefix='add_account')
-        add_account_basic_form = GameAccountBasicForm(prefix='add_account_basic')
+            instance = GameAccount.objects.get(kong_name=request.POST['kong_name'])
+            allow_command_form = AllowCommandForm(request.POST, prefix='allow_command', instance=instance)
+
+            if allow_command_form.is_valid():
+                if request.POST.get('allow_command', False):
+                    command_form = allow_command_form.save(commit=False)
+                    command_form.allow_command = True
+                    command_form.save()
+                else:
+                    command_form = allow_command_form.save(commit=False)
+                    command_form.allow_command = False
+                    command_form.save()
+
+                return HttpResponseRedirect('/profile/accounts/')
+
+            add_account_form = GameAccountForm(prefix='add_account')
+            add_account_basic_form = GameAccountBasicForm(prefix='add_account_basic')
+            show_canvas_form = ShowCanvasForm(prefix='show_canvas')
+
+        elif 'show_canvas' in request.POST:
+
+            instance = GameAccount.objects.get(kong_name=request.POST['kong_name'])
+            show_canvas_form = ShowCanvasForm(request.POST, prefix='show_canvas', instance=instance)
+
+            if show_canvas_form.is_valid():
+                if request.POST.get('show_canvas', False):
+                    canvas_form = show_canvas_form.save(commit=False)
+                    canvas_form.show_canvas = True
+                    canvas_form.save()
+                else:
+                    canvas_form = show_canvas_form.save(commit=False)
+                    canvas_form.show_canvas = False
+                    canvas_form.save()
+
+                return HttpResponseRedirect('/profile/accounts/')
+
+            add_account_form = GameAccountForm(prefix='add_account')
+            add_account_basic_form = GameAccountBasicForm(prefix='add_account_basic')
+            allow_command_form = AllowCommandForm(prefix='allow_command')
 
     try:
         accounts = GameAccount.objects.filter(user=request.user)
@@ -265,13 +329,13 @@ def user_accounts(request):
     return render(request, 'user_accounts.html', {'accounts': accounts,
                                                   'add_account_form': add_account_form,
                                                   'add_account_basic_form': add_account_basic_form,
+                                                  'allow_command_form': allow_command_form,
+                                                  'show_canvas_form': show_canvas_form,
                                                   })
 
 
 @login_required
 def user_decks(request):
-
-    import json
 
     if request.method == 'POST':
 
@@ -286,12 +350,19 @@ def user_decks(request):
             post_enemy_structures = request.POST.get('add_deck-enemy_structures')
 
             try:
-                instance = Decks.objects.get(name=post_name, mode=post_mode, type=post_type, bge=post_bge, friendly_structures=post_friendly_structures, enemy_structures=post_enemy_structures)
+                instance = Decks.objects.get(
+                    name=post_name,
+                    mode=post_mode,
+                    type=post_type,
+                    bge=card_reader.bge_to_dict(post_bge),
+                    friendly_structures=post_friendly_structures,
+                    enemy_structures=post_enemy_structures
+                )
                 # print "Instance: ", instance
                 add_deck_form = DeckForm(request.POST, user=request.user, prefix='add_deck', instance=instance)
             except Decks.DoesNotExist:
                 add_deck_form = DeckForm(request.POST, user=request.user, prefix='add_deck')
-                # print("Instance not found")
+                # print "Instance not found"
 
             if add_deck_form.is_valid():
                 print add_deck_form.errors
@@ -315,35 +386,15 @@ def user_decks(request):
                     for returned_card_id, returned_card_name in card_reader.card_name_to_id(card_name):
                         deck.setdefault("cards").append({"card_id": str(returned_card_id), "name": str(returned_card_name)})
 
-                deck = json.dumps(deck)
+                # deck = json.dumps(deck)
                 deck_form.deck = deck
 
-                # Convert BGE string into json format
-
-                bge_list = add_deck_form['bge'].value()
-                bge_list = bge_list.split(', ')
-
-                bge = {
-                    "global": {
-                        "global_id": "",
-                        "name": str(bge_list[0])
-                    },
-                    "friendly": {
-                        "friendly_id": "",
-                        "name": str(bge_list[1])
-                    },
-                    "enemy": {
-                        "enemy_id": "",
-                        "name": str(bge_list[2])
-                    }
-                }
-
-                bge = json.dumps(bge)
-                deck_form.bge = bge
+                deck_form.bge = card_reader.bge_to_dict(add_deck_form['bge'].value())
 
                 guild = GameAccount.objects.filter(name=deck_form.name).values('guild')
                 deck_form.guild = guild[0]['guild']
 
+                benchmark_sim.delay(add_deck_form['deck'].value())
                 deck_form.save()
                 return HttpResponseRedirect('/profile/decks/')
 
@@ -358,21 +409,17 @@ def user_decks(request):
 
         for deck in decks:
 
-            # Format json record to readable for display
-            json_card_list = json.loads(deck['deck'])
-            card_list = [json_card_list["commander"]["name"]]
+            card_list = [deck['deck']["commander"]["name"]]
 
-            for card in json_card_list["cards"]:
+            for card in deck['deck']["cards"]:
                 card_list.append(card["name"])
 
             card_names = ', '.join(card_list)
             deck['deck'] = card_names
 
-            json_bge_list = json.loads(deck['bge'])
-
-            bge_names = "Global: " + str(json_bge_list["global"]["name"] +
-                        ", Friendly: " + str(json_bge_list["friendly"]["name"] +
-                        ", Enemy: " + str(json_bge_list["enemy"]["name"])))
+            bge_names = "Global: " + str(deck["bge"]["global"]["name"] +
+                        ", Friendly: " + str(deck["bge"]["friendly"]["name"] +
+                        ", Enemy: " + str(deck["bge"]["enemy"]["name"])))
 
             deck['bge'] = bge_names
 
@@ -419,7 +466,7 @@ def ranks_war(request):
     war_data = WarStats.objects.order_by('date').values()
     totals_data = {}
 
-    # print "War Data:", war_data
+    print "War Data:", war_data
 
     for war in war_data:
 
@@ -495,25 +542,26 @@ def gauntlets(request):
 
     try:
         expiry_date = datetime.now() - timedelta(days=7)
-        decks = Decks.objects.all().exclude(date__lt=expiry_date).order_by("-date").values()
+        # decks = Decks.objects.all().exclude(date__lt=expiry_date).order_by("-date").values()
+        decks = Decks.objects.all().order_by("-date").values()
         commander_list = []
 
         for deck in decks:
-            json_card_list = json.loads(deck['deck'])
-            card_list = [json_card_list["commander"]["name"]]
-            commander_list.append(json_card_list["commander"]["name"].split('-')[0])
+            # json_card_list = json.loads(deck['deck'])
+            card_list = [deck['deck']["commander"]["name"]]
+            commander_list.append(deck['deck']["commander"]["name"].split('-')[0])
 
-            for card in json_card_list["cards"]:
+            for card in deck['deck']["cards"]:
                 card_list.append(card["name"])
 
             card_names = ', '.join(card_list)
             deck['deck'] = card_names
 
-            json_bge_list = json.loads(deck['bge'])
+            # json_bge_list = json.loads(deck['bge'])
 
-            bge_names = "Global: " + str(json_bge_list["global"]["name"] +
-                        ", Friendly: " + str(json_bge_list["friendly"]["name"] +
-                        ", Enemy: " + str(json_bge_list["enemy"]["name"])))
+            bge_names = "Global: " + str(deck['bge']["global"]["name"] +
+                        ", Friendly: " + str(deck['bge']["friendly"]["name"] +
+                        ", Enemy: " + str(deck['bge']["enemy"]["name"])))
 
             deck['bge'] = bge_names
 
@@ -538,9 +586,20 @@ def deckslist(request):
 
     if request.method == 'GET':
 
-        decks = Decks.objects.all()
-        serializer = DecksSerializer(decks, many=True)
-        return Response(serializer.data)
+        if 'guild' and 'battle_type' and 'gbge' in request.GET:
+
+            decks = Decks.objects.filter(
+                guild=request.GET['guild'],
+                type=request.GET['battle_type'],
+                bge__global__name=request.GET['gbge'])
+            serializer = DecksSerializer(decks, many=True)
+            return Response(serializer.data)
+
+        else:
+
+            decks = Decks.objects.all()
+            serializer = DecksSerializer(decks, many=True)
+            return Response(serializer.data)
 
     elif request.method == 'POST':
 

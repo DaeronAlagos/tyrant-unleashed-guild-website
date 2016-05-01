@@ -28,6 +28,31 @@
 					<!-- RIGHT -->
 					<div class="col-lg-12 col-md-12 col-sm-9 margin-bottom-80">
 
+                        {% if password_change_form.old_password.errors %}
+                            <div class="alert alert-warning margin-bottom-30"><!-- WARNING -->
+                                <strong>Warning!</strong> {{ password_change_form.old_password.errors.as_text }}
+                            </div>
+                        {% endif %}
+
+                        {% if password_change_form.new_password2.errors %}
+                            <div class="alert alert-warning margin-bottom-30"><!-- WARNING -->
+                                <strong>Warning!</strong> {{ password_change_form.new_password2.errors.as_text }}
+                            </div>
+                        {% endif %}
+
+                        {% if change_success %}
+                            <div class="alert alert-success margin-bottom-30"><!-- SUCCESS -->
+                                <strong>{{ change_success }}</strong>
+                            </div>
+                        {% endif %}
+
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a href="#profile" data-toggle="tab">Profile</a></li>
+                            <li><a href="#security" data-toggle="tab">Security</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                            <div class="tab-pane fade in active" id="profile">
                                 <div class="panel panel-default">
                                     <div class="panel-heading">
                                         <h2 class="panel-title">Username</h2>
@@ -36,7 +61,6 @@
                                         {{ user.get_username }}
                                     </div>
                                 </div>
-
                                 <div class="panel panel-default">
                                     <div class="panel-heading">
                                         <h2 class="panel-title">LINE Name</h2>
@@ -45,7 +69,8 @@
                                         Some LINE name
                                     </div>
                                 </div>
-
+                            </div>
+                            <div class="tab-pane fade" id="security">
                                 <div class="panel panel-default">
                                     <div class="panel-heading">
                                         <h2 class="panel-title">Authentication Token</h2>
@@ -54,6 +79,29 @@
                                         {{ token }}
                                     </div>
                                 </div>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h2 class="panel-title">Change Password</h2>
+                                    </div>
+                                    <div class="panel-body">
+                                        <form role="form" id="change_password_form" action="{% url 'user_settings' %}" method="post">
+                                            {% csrf_token %}
+                                            <fieldset>
+                                                <label>{{ password_change_form.old_password.label }}</label>
+                                                {{ password_change_form.old_password }}
+                                                <label>{{ password_change_form.new_password1.label }}</label>
+                                                {{ password_change_form.new_password1 }}
+                                                <label>{{ password_change_form.new_password2.label }}</label>
+                                                {{ password_change_form.new_password2 }}
+                                            </fieldset>
+                                            <div>
+                                                <button type="submit" value="Submit" class="btn btn-primary">Update Password</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
 					</div>
 

@@ -46,7 +46,7 @@
                 {{ get_owned_cards_form.errors }}
                 {{ get_owned_cards_form.non_field_errors }}
 
-                <div class="toggle toggle-transparent-body toggle-accordion">
+                <div class="toggle toggle-transparent-body">
 
                     {% if accounts %}
 
@@ -54,6 +54,7 @@
 
                             <div class="toggle">
                                 <label>{{ account.name }} ({{ account.kong_name }}) - {{ account.guild }}</label>
+
                                 <div class="toggle-content">
 
                                         {% if account.postdata %}
@@ -68,6 +69,20 @@
                                                 <div class="panel-body" style="word-break: break-all">
                                                     {{ account.canvas }}
                                                 </div>
+
+                                                <div class="panel-footer">
+                                                    <div class="text-right">
+                                                        <form role="form" action="{% url "user_accounts" %}" method="post" id="show_canvas_form" class="margin-bottom-0">
+
+                                                            <label class="switch switch">
+                                                                <input id="id_show_canvas" class="show_canvas" value="{{ account.kong_name }}" type="checkbox" {% if account.show_canvas %}checked{% endif %}>
+                                                                <span class="switch-label" data-on="YES" data-off="NO"></span>
+                                                                <span> Allow Officers to view Canvas</span>
+                                                            </label>
+
+                                                        </form>
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             <div class="panel panel-default">
@@ -80,6 +95,22 @@
                                                 <div class="panel-body" style="word-break: break-all">
                                                     {{ account.postdata }}
                                                 </div>
+
+                                                <div class="panel-footer">
+                                                    <div class="text-right">
+                                                        <form role="form" action="{% url "user_accounts" %}" method="post" id="allow_command_form" class="margin-bottom-0">
+
+                                                            <label class="switch switch">
+                                                                <input id="id_allow_command" class="allow_command" value="{{ account.kong_name }}" type="checkbox" {% if account.allow_command %}checked{% endif %}>
+                                                                <span class="switch-label" data-on="YES" data-off="NO"></span>
+                                                                <span> Allow use in Command Center</span>
+                                                            </label>
+
+                                                        </form>
+                                                    </div>
+                                                </div>
+
+
                                             </div>
 
                                                 <a href="{% url 'owned_cards' %}?account_name={{ account.name }}" class="btn btn-info btn-block">Download Owned Cards</a>
@@ -106,13 +137,7 @@
 
                                             </div>
 
-                                            <form role="form" method="post" id="delete_account_form" action="{% url 'user_accounts' %}">
-                                                {% csrf_token %}
-
-                                                <input type="hidden" value="{{ account.kong_name }}" name="delete_account-kong_name" id="id_delete_account-kong_name">
-                                                <button type="submit" value="Submit" name="delete_account" class="btn btn-danger btn-block">Delete Account</button>
-
-                                            </form>
+                                            <a href="{% url 'delete_account' %}?account_name={{ account.name }}" class="btn btn-danger btn-block">Delete</a>
 
                                         {% endif %}
 
@@ -179,7 +204,73 @@
 
     </section>
 
+{% endblock %}
 
+{% block script_block %}
 
+    <script type="text/javascript">
+
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie != '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                    // Only send the token to relative URLs i.e. locally.
+                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                }
+            }
+        });
+
+        $(document).ready(function(){
+            $(".allow_command").bind('click', function() {
+                if($(this).is(":checked")) {
+                    $.ajax({
+                        url: '{% url "user_accounts" %}',
+                        type: 'POST',
+                        data: { kong_name:$(this).attr("value"), allow_command:"True" }
+                    });
+                } else {
+                    $.ajax({
+                        url: '{% url "user_accounts" %}',
+                        type: 'POST',
+                        data: { kong_name:$(this).attr("value"), allow_command:"" }
+                    });
+                }
+            });
+        });
+
+        $(document).ready(function(){
+            $(".show_canvas").bind('click', function() {
+                if($(this).is(":checked")) {
+                    $.ajax({
+                        url: '{% url "user_accounts" %}',
+                        type: 'POST',
+                        data: { kong_name:$(this).attr("value"), show_canvas:"True" }
+                    });
+                } else {
+                    $.ajax({
+                        url: '{% url "user_accounts" %}',
+                        type: 'POST',
+                        data: { kong_name:$(this).attr("value"), show_canvas:"" }
+                    });
+                }
+            });
+        });
+
+    </script>
 
 {% endblock %}

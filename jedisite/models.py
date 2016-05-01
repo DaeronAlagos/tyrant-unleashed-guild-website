@@ -18,9 +18,7 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
-
-    is_officer = models.BooleanField(default=False)
-    is_bot = models.BooleanField(default=False)
+    line_name = models.CharField(max_length=64, blank=True)
 
     def __unicode__(self):
         return self.user.username
@@ -35,6 +33,8 @@ class GameAccount(models.Model):
     postdata = models.CharField(max_length=1024)
     guild = models.CharField(max_length=128)
     inventory = JSONField(null=True)
+    allow_command = models.BooleanField(default=False)
+    show_canvas = models.BooleanField(default=False)
 
     def __unicode__(self):
         return self.name

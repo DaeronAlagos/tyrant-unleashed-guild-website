@@ -73,7 +73,7 @@
 
                                     </td>
                                     <td class="text-center">
-                                        {% if game_account.canvas %}
+                                        {% if game_account.show_canvas %}
                                             <a href="{% url 'open_canvas' %}?account_name={{ game_account.name }}" target="_blank" class="btn btn-warning btn-xs width-100">Canvas</a>
                                             {% for action in action_log %}
                                                 {% if action.target_id == game_account.id %}

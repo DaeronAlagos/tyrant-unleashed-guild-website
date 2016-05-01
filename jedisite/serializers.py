@@ -4,9 +4,9 @@ from jedisite.models import Decks, GameAccount
 
 class DecksSerializer(serializers.ModelSerializer):
 
-    bge = serializers.CharField(required=False, allow_blank=True)
-    friendly_structures = serializers.CharField(required=False, allow_blank=True)
-    enemy_structures = serializers.CharField(required=False, allow_blank=True)
+    # bge = serializers.CharField(required=False, allow_blank=True)
+    # friendly_structures = serializers.CharField(required=False, allow_blank=True)
+    # enemy_structures = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = Decks
