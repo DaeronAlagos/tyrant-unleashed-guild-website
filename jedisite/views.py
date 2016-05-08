@@ -14,7 +14,7 @@ from jedisite.forms import UserForm, UserProfileForm, GameAccountForm, GameAccou
     UserIsActiveForm, AllowCommandForm, ShowCanvasForm, PasswordChangeForm
 from jedisite.models import GameAccount, User, Decks, ActionLog, Benchmarks, WarStats
 from jedisite.serializers import DecksSerializer, ForceAuthSerializer
-from .tasks import benchmark_sim
+from .tasks import benchmark_offense_sim, benchmark_defense_sim
 
 def is_officer(user):
     return user.groups.filter(name='Officers').exists()
@@ -358,11 +358,11 @@ def user_decks(request):
                     friendly_structures=post_friendly_structures,
                     enemy_structures=post_enemy_structures
                 )
-                # print "Instance: ", instance
+                print "Instance: ", instance
                 add_deck_form = DeckForm(request.POST, user=request.user, prefix='add_deck', instance=instance)
             except Decks.DoesNotExist:
                 add_deck_form = DeckForm(request.POST, user=request.user, prefix='add_deck')
-                # print "Instance not found"
+                print "Instance not found"
 
             if add_deck_form.is_valid():
                 print add_deck_form.errors
@@ -394,8 +394,22 @@ def user_decks(request):
                 guild = GameAccount.objects.filter(name=deck_form.name).values('guild')
                 deck_form.guild = guild[0]['guild']
 
-                benchmark_sim.delay(add_deck_form['deck'].value())
                 deck_form.save()
+                deck_id = Decks.objects.get(
+                    name=post_name,
+                    mode=post_mode,
+                    type=post_type,
+                    bge=card_reader.bge_to_dict(post_bge),
+                    friendly_structures=post_friendly_structures,
+                    enemy_structures=post_enemy_structures
+                )
+                print "Deck ID:", deck_id.id
+                if deck_id.type == "Faction" and deck_id.mode == "Offense" and deck_id.bge == {"global": {"global_id": "", "name": "None"},"friendly": {"friendly_id": "","name": "None"},"enemy": {"enemy_id": "","name": "None"}} and deck_id.friendly_structures == "Inspiring Altar, Inspiring Altar" and deck_id.enemy_structures == "Minefield":
+                    print "Benchmark Offense Deck"
+                    benchmark_offense_sim.delay(add_deck_form['deck'].value(), deck_id.id)
+                if deck_id.type == "Faction" and deck_id.mode == "Defense" and deck_id.bge == {"global": {"global_id": "", "name": "None"},"friendly": {"friendly_id": "","name": "None"},"enemy": {"enemy_id": "","name": "None"}} and deck_id.friendly_structures == "Minefield" and deck_id.enemy_structures == "Inspiring Altar, Inspiring Altar":
+                    print "Benchmark Defense Deck"
+                    benchmark_defense_sim.delay(add_deck_form['deck'].value(), deck_id.id)
                 return HttpResponseRedirect('/profile/decks/')
 
     else:
@@ -434,34 +448,66 @@ def user_decks(request):
 @login_required
 def benchmarks(request):
 
-    import json
+    benchmarks_queryset = Benchmarks.objects.all()  # Get Database query set
 
-    benchmark_decks = Benchmarks.objects.all().order_by('-score')
+    from collections import defaultdict
+    benchmarks_dict = defaultdict(dict)
 
-    print "Benchmark Decks:", benchmark_decks.values()
+    for account_name in benchmarks_queryset:
 
-    for benchmark_deck in benchmark_decks:
+        benchmarks_dict[account_name.deck.name]["guild"] = account_name.deck.guild
 
-        print benchmark_deck.deck.deck
+        try:
 
-        json_card_list = json.loads(benchmark_deck.deck.deck)
-        card_list = [json_card_list["commander"]["name"]]
+            if account_name.deck.mode == "Offense":
 
-        for card in json_card_list["cards"]:
-            card_list.append(card["name"])
+                card_list = [account_name.deck.deck["commander"]["name"]]
 
-        card_names = ', '.join(card_list)
+                for card in account_name.deck.deck["cards"]:
+                    card_list.append(card["name"])
 
-        benchmark_deck.deck.deck = card_names
+                card_names = ', '.join(card_list)
 
-    return render(request, "benchmarks.html", {'benchmark_decks': benchmark_decks,
+                benchmarks_dict[account_name.deck.name]["offense_deck"] = card_names
+                benchmarks_dict[account_name.deck.name]["offense_score"] = round(float(account_name.score), 2)
+                benchmarks_dict[account_name.deck.name]["offense_date"] = account_name.date
+
+            if account_name.deck.mode == "Defense":
+
+                card_list = [account_name.deck.deck["commander"]["name"]]
+
+                for card in account_name.deck.deck["cards"]:
+                    card_list.append(card["name"])
+
+                card_names = ', '.join(card_list)
+
+                benchmarks_dict[account_name.deck.name]["defense_deck"] = card_names
+                benchmarks_dict[account_name.deck.name]["defense_score"] = round(float(account_name.score), 2)
+                benchmarks_dict[account_name.deck.name]["defense_date"] = account_name.date
+
+        except KeyError:
+
+            pass
+
+        try:
+
+            benchmarks_dict[account_name.deck.name]["total"] = \
+                round(float((benchmarks_dict[account_name.deck.name]["offense_score"] +
+                             benchmarks_dict[account_name.deck.name]["defense_score"]) / 2), 2)
+
+        except KeyError:
+
+            benchmarks_dict[account_name.deck.name]["total"] = 0
+
+    benchmarks_accounts = benchmarks_dict.items()
+    benchmarks_accounts.sort(key=lambda x: (x[1]["total"]), reverse=True)
+
+    return render(request, "benchmarks.html", {'benchmarks_accounts': benchmarks_accounts,
                                                })
 
 
 @login_required
 def ranks_war(request):
-
-    # import json
 
     war_data = WarStats.objects.order_by('date').values()
     totals_data = {}
@@ -536,18 +582,16 @@ def accounts_list(request):
 @user_passes_test(is_officer)
 def gauntlets(request):
 
-    import json
     from datetime import datetime, timedelta
     from collections import Counter
 
     try:
         expiry_date = datetime.now() - timedelta(days=7)
-        # decks = Decks.objects.all().exclude(date__lt=expiry_date).order_by("-date").values()
-        decks = Decks.objects.all().order_by("-date").values()
+        decks = Decks.objects.all().exclude(date__lt=expiry_date).order_by("-date").values()
+        # decks = Decks.objects.all().order_by("-date").values()
         commander_list = []
 
         for deck in decks:
-            # json_card_list = json.loads(deck['deck'])
             card_list = [deck['deck']["commander"]["name"]]
             commander_list.append(deck['deck']["commander"]["name"].split('-')[0])
 
@@ -556,8 +600,6 @@ def gauntlets(request):
 
             card_names = ', '.join(card_list)
             deck['deck'] = card_names
-
-            # json_bge_list = json.loads(deck['bge'])
 
             bge_names = "Global: " + str(deck['bge']["global"]["name"] +
                         ", Friendly: " + str(deck['bge']["friendly"]["name"] +
@@ -569,7 +611,6 @@ def gauntlets(request):
         commander_dict = {}
         for commander in commander_count:
             commander_dict.update({str(commander): round(float(commander_count[commander]) / sum(commander_count.itervalues()) * 100, 1)})
-        # print "Commander Dict:", commander_dict
 
     except Decks.DoesNotExist:
         pass

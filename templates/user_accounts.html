@@ -117,25 +117,25 @@
 
                                         {% else %}
 
-                                            <div class="fancy-form">
-                                                <textarea rows="5" class="form-control word-count" data-info="textarea-words-info" placeholder="Enter cards here, one card per line"></textarea>
-
-                                                <i class="fa fa-list"><!-- icon --></i>
-
-                                                <span class="fancy-hint size-11 text-muted">
-                                                    <strong>Hint:</strong> For multiple copies use 'Card Name #2'
-                                                </span>
-
-                                                <form role="form" method="post" id="upload_owned_cards_form" action="{% url 'user_accounts' %}">
-                                                    {% csrf_token %}
-
-
-                                                    <br>
-                                                    <button type="submit" value="Submit" name="upload_owned_cards" class="btn btn-info btn-block">Update</button>
-
-                                                </form>
-
-                                            </div>
+{#                                            <div class="fancy-form">#}
+{#                                                <textarea rows="5" class="form-control word-count" data-info="textarea-words-info" placeholder="Enter cards here, one card per line"></textarea>#}
+{##}
+{#                                                <i class="fa fa-list"><!-- icon --></i>#}
+{##}
+{#                                                <span class="fancy-hint size-11 text-muted">#}
+{#                                                    <strong>Hint:</strong> For multiple copies use 'Card Name #2'#}
+{#                                                </span>#}
+{##}
+{#                                                <form role="form" method="post" id="upload_owned_cards_form" action="{% url 'user_accounts' %}">#}
+{#                                                    {% csrf_token %}#}
+{##}
+{##}
+{#                                                    <br>#}
+{#                                                    <button type="submit" value="Submit" name="upload_owned_cards" class="btn btn-info btn-block">Update</button>#}
+{##}
+{#                                                </form>#}
+{##}
+{#                                            </div>#}
 
                                             <a href="{% url 'delete_account' %}?account_name={{ account.name }}" class="btn btn-danger btn-block">Delete</a>
 

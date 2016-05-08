@@ -59,7 +59,7 @@ class Decks(models.Model):
 class Benchmarks(models.Model):
 
     deck = models.ForeignKey(Decks)
-    score = models.IntegerField()
+    score = models.DecimalField(max_digits=6, decimal_places=3)
     date = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
