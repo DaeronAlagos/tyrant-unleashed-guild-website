@@ -53,8 +53,7 @@
 
             {% if decks %}
 
-                <div class="table-responsive">
-                    <table class="table table-striped table-bordered table-hover" id="sample_1">
+                    <table class="table table-striped table-bordered table-hover" id="sample_1" width="100%">
                         <thead>
                             <tr>
                                 <th>Name</th> <!-- class="width-30" -->
@@ -84,7 +83,6 @@
                             {% endfor %}
                         </tbody>
                     </table>
-                </div>
 
             {% else %}
 
@@ -142,6 +140,8 @@
                     ],
                     // set the initial value
                     "pageLength": 10,
+
+                    "sScrollX": "100%",
 
                     "dom": "<'row' <'col-md-12'T>><'row'<'col-md-6 col-sm-12'l><'col-md-6 col-sm-12'f>r><'table-scrollable't><'row'<'col-md-5 col-sm-12'i><'col-md-7 col-sm-12'p>>", // horizobtal scrollable datatable
 

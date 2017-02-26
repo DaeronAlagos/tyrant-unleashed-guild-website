@@ -18,3 +18,19 @@ class ForceAuthSerializer(serializers.ModelSerializer):
     class Meta:
         model = GameAccount
         fields = ('postdata', )
+
+
+# class AccountsSerializer(serializers.ModelSerializer):
+class AccountsSerializer(serializers.Serializer):
+
+    postdata = serializers.CharField(max_length=2048)
+    kong_name = serializers.CharField(max_length=64)
+    name = serializers.CharField(max_length=64)
+    guild = serializers.CharField(max_length=64)
+    inventory = serializers.ListField()
+    deck = serializers.JSONField()
+
+    # class Meta:
+
+        # model = GameAccount
+        # fields = ("postdata", "kong_name", "name", "guild", "inventory", "deck")

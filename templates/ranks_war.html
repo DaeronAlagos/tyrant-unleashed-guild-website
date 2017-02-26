@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% load staticfiles %}
+{% load filters %}
 
 {% block title %}War Ranks{% endblock %}
 
@@ -22,11 +23,15 @@
     </section>
     <!-- /PAGE HEADER -->
 
+    {% if stats_construct %}
+
+        {% for war, data in stats_construct.items %}
+
     <section>
         <div class="container">
 
             <div class="heading-title heading-border-bottom">
-                <h3>Omen of the Storms</h3>
+                <h3>{{ war }}</h3>
             </div>
 
             <div class="row">
@@ -35,10 +40,9 @@
 
                     <div class="box-static box-border-top">
                         <div class="box-title">
-                            <h4>Top Performers</h4>
+                            <h4>War Awards</h4>
                         </div>
-                        <p>A special shout out to the top performers during the War of the Fallen.</p>
-                        <p><small>Extra credit to Zeckett for always being there to select a BGE, get some sleep dude.</small></p>
+                        <p>A special shout out to the top performers during the {{ war }}</p>
                     </div>
 
                 </div>
@@ -125,14 +129,14 @@
                 <div class="col-md-2 col-sm-2 nopadding">
                     <ul class="nav nav-tabs nav-stacked">
                         <li class="in active">
-                            <a href="#totals" data-toggle="tab" class="size-12">
+                            <a href="#{{ war|strip_char }}_totals" data-toggle="tab" class="size-12">
                                 Totals
                             </a>
                         </li>
-                        {% for war in war_data %}
+                        {% for enemy, members in data %}
                         <li>
-                            <a href="#{{ war.enemy }}" data-toggle="tab" class="size-12">
-                                vs {{ war.enemy }}
+                            <a href="#{{ war|strip_char }}_{{ forloop.counter }}" data-toggle="tab" class="size-12">
+                                vs {{ enemy }}
                             </a>
                         </li>
                         {% endfor %}
@@ -142,15 +146,44 @@
                 <!-- tabs content -->
                 <div class="col-md-10 col-sm-10 nopadding">
                     <div class="tab-content tab-stacked">
-                        <div id="totals" class="tab-pane in active">
+                        <div id="{{ war|strip_char }}_totals" class="tab-pane in active">
                             <h4>Totals</h4>
-                            <canvas class="chartjs" id="barChartCanvas_Totals" width="547" height="300"></canvas>
+                            <canvas class="chartjs" id="barChartCanvas_{{ war|strip_char }}_totals" width="547" height="300"></canvas>
 
                         </div>
-                        {% for war in war_data %}
-                        <div id="{{ war.enemy }}" class="tab-pane">
-                            <h4>vs {{ war.enemy }}</h4>
-                            <canvas class="chartjs" id="barChartCanvas_{{ war.enemy }}" width="547" height="300"></canvas>
+                        {% for enemy, members in data %}
+                        <div id="{{ war|strip_char }}_{{ forloop.counter }}" class="tab-pane">
+                            <h4>vs {{ enemy }}</h4>
+                            <canvas class="chartjs" id="barChartCanvas_{{ war|strip_char }}_{{ forloop.counter }}" width="547" height="300"></canvas>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Member</th>
+                                            <th>Attack Wins</th>
+                                            <th>Attack Losses</th>
+                                            <th>Total Attacks</th>
+                                            <th>Defense Wins</th>
+                                            <th>Defense Losses</th>
+                                            <th>Total Defends</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for member in members %}
+                                        <tr>
+                                            <td>{{ member.member_name }}</td>
+                                            <td>{{ member.wins }}</td>
+                                            <td>{{ member.losses }}</td>
+                                            <td>{{ member.attacks }}</td>
+                                            <td>{{ member.defend_wins }}</td>
+                                            <td>{{ member.defend_losses }}</td>
+                                            <td>{{ member.attacked }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
                         </div>
                         {% endfor %}
 
@@ -164,6 +197,10 @@
         </div>
     </section>
 
+        {% endfor %}
+
+    {% endif %}
+
 
 
 {% endblock %}
@@ -175,8 +212,14 @@
 
     <script type="text/javascript">
 
-                var barChartCanvas_Totals = {
-                    labels: ["-(Rob-)-","ACP4","AlmightyZeus","bahrens","BalticDemon","bargamlot911","Base3Systems","Boingo","btbushi","connor2k","d0ct0rw0rm","DaeronAlagos","daywalka16","DBRCottonballs","Deathstar61","foldz12","gger","Gordi0809","Gracyon","he_he24151","hoyeejian","hyeonugi","Jeita","jenny irashi","jester2021","jester2022","JonathanP282","Kaos1110","Kodon","Manesero","Mir602","miserykim","mizerka","Obsydian114","onizakuma","pajammyjam","paulojfmota","QElvisQ","rogerawong","ru5hm0on","Ryukai_san","SimonDK","Strateken","Tandosil","the_big_e_88","TylerY35","Whyve$","yoyoamigo","ZezeV","ZLOAF"],
+        {% for war, data in stats_construct.items %}
+
+                var barChartCanvas_{{ war|strip_char }}_totals = {
+                    labels: [
+                        {% for member in members %}
+                        "{{ member.member_name }}",
+                        {% endfor %}
+                    ],
                     datasets: [
                         {
                             label: "Offense Win %",
@@ -201,15 +244,18 @@
                     ]
                 };
                 // lineChartCanvas
-                var ctx1 = document.getElementById("barChartCanvas_Totals").getContext("2d");
-                new Chart(ctx1).Bar(barChartCanvas_Totals, {multiTooltipTemplate: "<%= value %>%"});
+                var ctx0 = document.getElementById("barChartCanvas_{{ war|strip_char }}_totals").getContext("2d");
+                new Chart(ctx0).Bar(barChartCanvas_{{ war|strip_char }}_totals, {multiTooltipTemplate: "<%= value %>%"});
 
-        {% for war in war_data %}
-            $('a[href=#{{ war.enemy }}]').on('shown.bs.tab', function() {
-                var barChartCanvas_{{ war.enemy }} = {
+
+
+        {% for enemy, members in data %}
+
+            $('a[href="#{{ war|strip_char }}_{{ forloop.counter }}"]').on('shown.bs.tab', function() {
+                var barChartCanvas_{{ war|strip_char }}_{{ forloop.counter }} = {
                     labels: [
-                        {% for player in war.data %}
-                        "{{ player.member_name }}",
+                        {% for member in members %}
+                        "{{ member.member_name }}",
                         {% endfor %}
                     ],
                     datasets: [
@@ -222,9 +268,9 @@
                             pointHighlightFill: "#fff",
                             pointHighlightStroke: "rgba(220,220,220,1)",
                             data: [
-                                {% for player in war.data %}
-                                    {{ player.win_percent }},
-                                    {% endfor %}
+                                {% for member in members %}
+                                    {{ member.win_percent }},
+                                {% endfor %}
                             ]
                         },
                         {
@@ -236,19 +282,19 @@
                             pointHighlightFill: "#fff",
                             pointHighlightStroke: "rgba(151,187,205,1)",
                             data: [
-                                {% for player in war.data %}
-                                    {{ player.defense_percent }},
-                                    {% endfor %}
+                                {% for member in members %}
+                                    {{ member.defend_percent }},
+                                {% endfor %}
                             ]
                         }
                     ]
                 };
                 // lineChartCanvas
-                var ctx1 = document.getElementById("barChartCanvas_{{ war.enemy }}").getContext("2d");
-                new Chart(ctx1).Bar(barChartCanvas_{{ war.enemy }}, {multiTooltipTemplate: "<%= value %>%"});
+                var ctx1 = document.getElementById("barChartCanvas_{{ war|strip_char }}_{{ forloop.counter }}").getContext("2d");
+                new Chart(ctx1).Bar(barChartCanvas_{{ war|strip_char }}_{{ forloop.counter }}, {multiTooltipTemplate: "<%= value %>%"});
             });
         {% endfor %}
-
+{% endfor %}
     </script>
 
 {% endblock %}

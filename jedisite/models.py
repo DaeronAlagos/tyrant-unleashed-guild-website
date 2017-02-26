@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.postgres.fields import JSONField
+from django.contrib.postgres.fields import JSONField, ArrayField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
@@ -29,12 +29,14 @@ class GameAccount(models.Model):
 
     kong_name = models.CharField(max_length=64, unique=True)
     name = models.CharField(max_length=64, unique=True)
-    canvas = models.URLField(max_length=1024)
-    postdata = models.CharField(max_length=1024)
+    postdata = models.CharField(max_length=2048, blank=True, null=True)
     guild = models.CharField(max_length=128)
-    inventory = JSONField(null=True)
+    inventory = ArrayField(
+        models.CharField(max_length=64, blank=True),
+        blank=True,
+        null=True,
+    )
     allow_command = models.BooleanField(default=False)
-    show_canvas = models.BooleanField(default=False)
 
     def __unicode__(self):
         return self.name
@@ -48,8 +50,8 @@ class Decks(models.Model):
     mode = models.CharField(max_length=30)
     type = models.CharField(max_length=30)
     bge = JSONField()
-    friendly_structures = models.CharField(max_length=128)
-    enemy_structures = models.CharField(max_length=128)
+    friendly_structures = models.CharField(max_length=128, blank=True)
+    enemy_structures = models.CharField(max_length=128, blank=True)
     date = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
@@ -80,9 +82,10 @@ class ActionLog(models.Model):
 class WarStats(models.Model):
 
     name = models.CharField(max_length=64)
-    enemy = models.CharField(max_length=64)
+    friendly_guild = models.CharField(max_length=64)
+    enemy_guild = models.CharField(max_length=64)
     data = JSONField()
-    date = models.DateTimeField(auto_now=True)
+    date = models.DateTimeField(auto_now=False, auto_now_add=True)
 
     def __unicode__(self):
         return self.name

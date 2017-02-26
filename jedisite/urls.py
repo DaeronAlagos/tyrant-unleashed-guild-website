@@ -17,9 +17,11 @@ urlpatterns = [
     url(r'^brawl-ranks/$', views.ranks_brawl, name='ranks_brawl'),
     url(r'^members/$', views.members, name='members'),
     url(r'^accounts/$', views.accounts_list, name='accounts'),
-    url(r'^open_canvas/$', views.open_canvas, name='open_canvas'),
     url(r'^gauntlets/$', views.gauntlets, name='gauntlets'),
+    url(r'^download/$', views.download, name='download'),
+    url(r'^benchmark_gauntlet/$', views.benchmark_gauntlet, name='benchmark_gauntlet'),
     url(r'^deckslist/$', views.deckslist, name='deckslist'),
+    url(r'^accounts_list/$', views.api_account_list, name='api_account_list'),
     url(r'^auth/$', views.force_auth, name='force_auth'),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]

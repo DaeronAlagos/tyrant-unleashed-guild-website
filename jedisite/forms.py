@@ -2,6 +2,8 @@ from django import forms
 from jedisite.models import GameAccount, Decks, UserProfile
 from django.contrib.auth.models import User
 from django.contrib.auth import password_validation
+import utils.tyrant_utils as tyrant_utils
+import re
 
 
 class UserForm(forms.ModelForm):
@@ -13,17 +15,13 @@ class UserForm(forms.ModelForm):
 
 
 class UserProfileForm(forms.ModelForm):
-
     class Meta:
         model = UserProfile
         fields = ('line_name',)
 
 
 class SetPasswordForm(forms.Form):
-    """
-    A form that lets a user change set their password without entering the old
-    password
-    """
+
     error_messages = {
         'password_mismatch': "The two password fields didn't match.",
     }
@@ -93,79 +91,225 @@ class PasswordChangeForm(SetPasswordForm):
 
 
 class GameAccountForm(forms.ModelForm):
+    postdata = forms.CharField(label=u'Postdata',
+                               widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': ''})
+                               )
 
-    canvas = forms.URLField(label=u'Canvas Link',
-                            widget=forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'http://'})
-                            )
+    def clean_postdata(self):
+        postdata = self.cleaned_data['postdata']
+        tyrant_api = tyrant_utils.TyrantAPI()
+        postdata_params = tyrant_api.get_postdata_params(postdata)
+        if GameAccount.objects.filter(kong_name=str(postdata_params['kong_name'][0])).exists():
+            raise forms.ValidationError("Account already exists!")
+
+        return postdata
 
     class Meta:
         model = GameAccount
-        fields = ('canvas',)
+        fields = ('postdata',)
 
 
 class GameAccountBasicForm(forms.ModelForm):
+    GUILD_CHOICES = (
+        ('MasterJedis', 'MasterJedis'),
+        ('Quasar', 'Quasar'),
+        ('Corona', 'Corona'),
+    )
 
-    name = forms.CharField(max_length=128,
-                           label=u'Account Name',
-                           widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Game Account Name'})
-                           )
-    kong_name = forms.CharField(max_length=128,
-                                label=u'Kong Name',
-                                widget=forms.TextInput(attrs={
-                                    'class': 'form-control', 'placeholder': 'Kongregate Username'}
-                                ))
-    guild = forms.CharField(max_length=64,
-                            label=u'Guild',
-                            widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Guild Name'})
-                            )
+    name = forms.CharField(
+        max_length=128,
+        label=u'Account Name',
+        widget=forms.TextInput(
+            attrs={
+                'class': 'form-control',
+                'placeholder': 'Game Account Name'
+            }
+        )
+    )
+
+    kong_name = forms.CharField(
+        max_length=128,
+        label=u'Kong Name',
+        widget=forms.TextInput(
+            attrs={
+                'class': 'form-control', 'placeholder': 'Kongregate Username'
+            }
+        )
+    )
+
+    guild = forms.ChoiceField(
+        choices=GUILD_CHOICES,
+        required=True,
+        label=u'Guild',
+        widget=forms.Select(
+            attrs={
+                'class': 'form-control margin-bottom-10'
+            }
+        )
+    )
 
     class Meta:
         model = GameAccount
         exclude = ('user', 'canvas', 'postdata', 'inventory', 'show_canvas', 'allow_command')
 
 
-class DeckForm(forms.ModelForm):
+class ChangeGuildForm(forms.ModelForm):
+    GUILD_CHOICES = (
+        ('MasterJedis', 'MasterJedis'),
+        ('Quasar', 'Quasar'),
+        ('CorNox', 'CorNox'),
+    )
 
+    guild = forms.ChoiceField(
+        choices=GUILD_CHOICES,
+        required=False,
+        label=u'Guild',
+        widget=forms.Select(
+            attrs={
+                'class': 'form-control change_guild'
+            }
+        ),
+    )
+
+    class Meta:
+        model = GameAccount
+        fields = ('guild',)
+
+
+class DeckForm(forms.ModelForm):
     MODE_CHOICES = (('Offense', 'Offense'),
                     ('Defense', 'Defense')
                     )
 
-    mode = forms.ChoiceField(choices=MODE_CHOICES, required=True, label=u'Mode', widget=forms.Select(attrs={'class': 'form-control margin-bottom-10'}))
+    mode = forms.ChoiceField(
+        choices=MODE_CHOICES,
+        required=True,
+        label=u'Mode',
+        widget=forms.Select(
+            attrs={
+                'class': 'form-control margin-bottom-10'
+            }
+        )
+    )
 
-    TYPE_CHOICES = (('Brawl', 'Brawl'),
-                    ('Faction', 'War'),
-                    ('Conquest', 'Conquest')
-                    )
-    type = forms.ChoiceField(choices=TYPE_CHOICES, required=True, label=u'Type', widget=forms.Select(attrs={'class': 'form-control margin-bottom-10'}))
+    TYPE_CHOICES = (
+        ('Faction', 'War'),
+        ('Brawl', 'Brawl'),
+        ('Conquest', 'Conquest')
+    )
+
+    type = forms.ChoiceField(
+        choices=TYPE_CHOICES,
+        required=True,
+        label=u'Type',
+        widget=forms.Select(
+            attrs={
+                'class': 'form-control margin-bottom-10'
+            }
+        )
+    )
+
+    structures = [
+        'Tesla Coil-4',
+        'Minefield-4',
+        'Foreboding Archway-4',
+        'Forcefield-4',
+        'Illuminary Blockade-4',
+        'Inspiring Altar-4',
+        'Death Factory-4',
+        'Lightning Cannon-4',
+        'Sky Fortress-4',
+        'Mortar Tower-4',
+        'Corrosive Spore-4'
+    ]
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(DeckForm, self).__init__(*args, **kwargs)
+        self.fields['name'] = forms.ModelChoiceField(queryset=GameAccount.objects.filter(user=user).order_by('name'),
+                                                     widget=forms.Select(
+                                                         attrs={'class': 'form-control margin-bottom-10'}))
+        self.fields['deck'] = forms.CharField(max_length=256, widget=forms.TextInput(
+            attrs={'class': 'form-control margin-bottom-10',
+                   'placeholder': 'Example: Commander, Card 1, Card 2, Card 3'}))
+        self.fields['bge'] = forms.CharField(max_length=128, required=False, label=u'BGE', widget=forms.TextInput(
+            attrs={'class': 'form-control margin-bottom-10',
+                   'placeholder': 'Example: Protect all 2, None, Triage (Leave blank for Benchmark)'}))
+        self.fields['friendly_structures'] = forms.CharField(max_length=50, required=False,
+                                                             label=u'Friendly Structures', widget=forms.TextInput(
+                attrs={'class': 'form-control margin-bottom-10',
+                       'placeholder': 'Example: Death Factory, Death Factory'}))
+        self.fields['enemy_structures'] = forms.CharField(max_length=50, required=False, label=u'Enemy Structures',
+                                                          widget=forms.TextInput(attrs={'class': 'form-control',
+                                                                                        'placeholder': 'Example: Tesla Coil'}))
+        # self.fields['guild'] = GameAccount.objects.all().filter(name=self.fields['name'])
+
+    def clean_deck(self):
+
+        deck = self.cleaned_data['deck']
+        card_reader = tyrant_utils.CardReader()
+        player_cards_list = deck.split(',')
+        cards = card_reader.cards_list
+        for card in player_cards_list:
+            m = re.search(r"^\s?(.*?[\d]?)(-\d)?[ ]?#?(\d{1,2})?$", card)
+            print "Clean Deck:", (unicode(m.group(1)))
+            if not any(d['card_name'] == unicode(m.group(1)) for d in cards):
+                raise forms.ValidationError(card + " is not a valid card!")
+
+        return deck
+
+    def clean_friendly_structures(self):
+
+        friendly_structures = self.cleaned_data['friendly_structures']
+        if friendly_structures == "":
+            return friendly_structures
+        else:
+            friendly_structures_list = friendly_structures.split(",")
+            for idx, structure in enumerate(friendly_structures_list):
+                friendly_structures_list[idx] = structure.strip().title() + "-4"
+                if friendly_structures_list[idx] not in self.structures:
+                    raise forms.ValidationError(structure + " is not a valid Structure!")
+
+            return ", ".join(friendly_structures_list)
+
+    def clean_enemy_structures(self):
+
+        enemy_structures = self.cleaned_data['enemy_structures']
+        if enemy_structures == "":
+            return enemy_structures
+        else:
+            enemy_structures_list = enemy_structures.split(",")
+            for idx, structure in enumerate(enemy_structures_list):
+                enemy_structures_list[idx] = structure.strip().title() + "-4"
+                if enemy_structures_list[idx] not in self.structures:
+                    raise forms.ValidationError(structure + " is not a valid Structure")
+
+            return ", ".join(enemy_structures_list)
 
     class Meta:
         model = Decks
         exclude = ('guild', 'date',)
 
-    def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)
-        super(DeckForm, self).__init__(*args, **kwargs)
-        self.fields['name'] = forms.ModelChoiceField(queryset=GameAccount.objects.filter(user=user), widget=forms.Select(attrs={'class': 'form-control margin-bottom-10'}))
-        self.fields['deck'] = forms.CharField(max_length=256, widget=forms.TextInput(attrs={'class': 'form-control margin-bottom-10', 'placeholder': 'Example: Commander, Card 1, Card 2, Card 3'}))
-        self.fields['bge'] = forms.CharField(max_length=128, required=False, label=u'BGE', widget=forms.TextInput(attrs={'class': 'form-control margin-bottom-10', 'placeholder': 'Protect all 2, None, Triage (Must be 3 values)'}))
-        self.fields['friendly_structures'] = forms.CharField(max_length=50, required=False, label=u'Friendly Structures', widget=forms.TextInput(attrs={'class': 'form-control margin-bottom-10', 'placeholder': 'Example: Death Factory, Death Factory'}))
-        self.fields['enemy_structures'] = forms.CharField(max_length=50, required=False, label=u'Enemy Structures', widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Example: Tesla Coil'}))
-        #self.fields['guild'] = GameAccount.objects.all().filter(name=self.fields['name'])
-
 
 class UpdatePostdataForm(forms.ModelForm):
-    canvas = forms.URLField(widget=forms.HiddenInput())
-    kong_name = forms.CharField(widget=forms.HiddenInput())
+    canvas = forms.URLField(
+        widget=forms.HiddenInput()
+    )
+    kong_name = forms.CharField(
+        widget=forms.HiddenInput()
+    )
 
-    #kong_name = forms.URLField(widget=forms.HiddenInput(attrs={'value': 'canvas'}))
+    # kong_name = forms.URLField(widget=forms.HiddenInput(attrs={'value': 'canvas'}))
 
     class Meta:
         model = GameAccount
-        fields = ('canvas', )
+        fields = ('canvas',)
 
 
 class DeleteAccountForm(forms.ModelForm):
-    kong_name = forms.URLField(widget=forms.HiddenInput())
+    kong_name = forms.URLField(
+        widget=forms.HiddenInput()
+    )
 
     class Meta:
         model = GameAccount
@@ -180,17 +324,45 @@ class UserIsActiveForm(forms.ModelForm):
         fields = ('is_active',)
 
 
-class ShowCanvasForm(forms.ModelForm):
-
-    class Meta:
-        model = GameAccount
-        fields = ('show_canvas',)
-
-
 class AllowCommandForm(forms.ModelForm):
-
-    allow_command = forms.BooleanField(required=False)
+    allow_command = forms.BooleanField(
+        required=False
+    )
 
     class Meta:
         model = GameAccount
         fields = ('allow_command',)
+
+
+class UploadInventoryForm(forms.ModelForm):
+    inventory = forms.CharField(
+        label=u'Owned Cards',
+        widget=(
+            forms.Textarea(
+                attrs={
+                    'class': 'form-control word-count',
+                    'data-info': 'textarea-words-info',
+                    'placeholder': 'Enter cards here, one card per line',
+                    'rows': '5'
+                }
+            )
+        ),
+    )
+
+    def clean_inventory(self):
+
+        player_card_list = self.cleaned_data['inventory'].splitlines()
+        card_reader = tyrant_utils.CardReader()
+        cards = card_reader.cards_list
+        global_card_list = []
+        for card in player_card_list:
+            m = re.search("^\s?(.*?[\d]?)(-\d)?[ ]?#?(\d{1,2})?$", card)
+            # print(str(m.group(1)))
+            if not [d['card_name'] == str(m.group(1)) for d in cards]:
+                raise forms.ValidationError(card + " is not a valid card!")
+
+        return player_card_list
+
+    class Meta:
+        model = GameAccount
+        fields = ('inventory',)

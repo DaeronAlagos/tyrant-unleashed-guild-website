@@ -1,7 +1,6 @@
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponseRedirect, HttpResponse
-from django.template.response import TemplateResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.debug import sensitive_post_parameters
@@ -10,27 +9,33 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 import utils.tyrant_utils as tyrant_utils
-from jedisite.forms import UserForm, UserProfileForm, GameAccountForm, GameAccountBasicForm, DeckForm,\
-    UserIsActiveForm, AllowCommandForm, ShowCanvasForm, PasswordChangeForm
+from jedisite.forms import UserForm, UserProfileForm, GameAccountForm, GameAccountBasicForm, DeckForm, \
+    UserIsActiveForm, AllowCommandForm, PasswordChangeForm, UploadInventoryForm, ChangeGuildForm
 from jedisite.models import GameAccount, User, Decks, ActionLog, Benchmarks, WarStats
-from jedisite.serializers import DecksSerializer, ForceAuthSerializer
-from .tasks import benchmark_offense_sim, benchmark_defense_sim
+from jedisite.serializers import DecksSerializer, ForceAuthSerializer, AccountsSerializer
+from .tasks import benchmark_offense_sim, benchmark_defense_sim, check_war_status
 
+
+# Check if account is in the Officers user group
 def is_officer(user):
     return user.groups.filter(name='Officers').exists()
 
 
+# Check if account is in the Force users group
 def is_force_user(user):
     return user.groups.filter(name='Force').exists()
 
 
+# Home page route
 def index(request):
     return render(request, "index.html", {})
 
 
+# Registration page route
 def register(request):
     registered = False
 
+    # If form is submitted
     if request.method == 'POST':
         user_form = UserForm(data=request.POST)
         profile_form = UserProfileForm(data=request.POST)
@@ -54,14 +59,17 @@ def register(request):
     else:
         user_form = UserForm()
 
+    # Render page with custom complete message
     return render(request,
                   'register.html',
-                  {'user_form': user_form, 'registered': registered, 'register_success': 'Registration Complete! Please notify an officer on LINE.'}
+                  {'user_form': user_form, 'registered': registered, 'register_success':
+                      'Registration Complete! Please notify an officer on LINE.'}
                   )
 
 
+# Log in page route
 def user_login(request):
-
+    # If form is submitted
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -72,30 +80,37 @@ def user_login(request):
 
             if user.is_active:
                 login(request, user)
+                # Redirect to users settings page
                 return HttpResponseRedirect('/profile/settings/')
             else:
-                return render(request, 'login.html', {'disabled': 'Your Jedi account is disabled. Please contact an officer on LINE'})
+                # If account exists by has not been activated by admin
+                return render(request, 'login.html',
+                              {'disabled': 'Your Jedi account is disabled. Please contact an officer on LINE'})
 
         else:
 
-            print("Invalid login details: {0} {1}".format(username, password))
+            # print("Invalid login details: {0} {1}".format(username, password))
+            # If account log in details are invalid
             return render(request, 'login.html', {'invalid_login': 'Invalid login details supplied'})
 
+    # Return login page
     else:
         return render(request, 'login.html', {})
 
 
+# Log out route (must already be logged in)
 @login_required
 def user_logout(request):
-
     logout(request)
     return HttpResponseRedirect('/')
 
 
+# User settings route (CSRF protect enabled as page includes password change form)
 @login_required
 @csrf_protect
 @sensitive_post_parameters('old_password', 'new_password1', 'new_password2')
 def user_settings(request):
+    token = None
 
     try:
         token = Token.objects.filter(user=request.user)
@@ -103,6 +118,7 @@ def user_settings(request):
     except Token.DoesNotExist:
         pass
 
+    # If form is submitted
     if request.method == "POST":
         password_change_form = PasswordChangeForm(user=request.user, data=request.POST)
         if password_change_form.is_valid():
@@ -115,14 +131,15 @@ def user_settings(request):
     else:
         password_change_form = PasswordChangeForm(user=request.user)
 
+    # Display user settings page
     return render(request, 'user_settings.html', {'token': token,
                                                   'password_change_form': password_change_form
                                                   })
 
 
+# Delete account page (uses GET method so it can't be issued using POST, profile must also own game account to access)
 @login_required
 def delete_account(request):
-
     if request.method == 'GET':
         if 'account_name' in request.GET:
             account_name = request.GET['account_name']
@@ -131,7 +148,6 @@ def delete_account(request):
                 account = GameAccount.objects.get(name=account_name)
 
                 if account.user_id == request.user.id:
-
                     account.delete()
                     return redirect('/profile/accounts/')
 
@@ -143,11 +159,11 @@ def delete_account(request):
 
 @login_required
 def update_postdata(request):
-
     if request.method == 'GET':
 
         if 'account_name' in request.GET:
 
+            # check_war_status.delay()  # For testing Celery Schedules
             account_name = request.GET['account_name']
 
             try:
@@ -178,7 +194,6 @@ def update_postdata(request):
 
 @login_required
 def get_owned_cards(request):
-
     if request.method == 'GET':
 
         if 'account_name' in request.GET:
@@ -190,15 +205,21 @@ def get_owned_cards(request):
                 import StringIO
 
                 account = GameAccount.objects.get(name=account_name)
-                account_details = tyrant_utils.AccountDetails()
-                card_list = account_details.get_owned_cards(account.postdata)
-                print("Cardlist:", card_list)
+
+                if account.postdata:
+                    account_details = tyrant_utils.AccountDetails()
+                    card_list = account_details.get_owned_cards(account.postdata)
+                    # print("Cardlist:", card_list)
+                else:
+                    card_list = account.inventory
+                    # print(card_list)
 
                 f = StringIO.StringIO()
                 writer = csv.writer(f)
 
                 for card in card_list:
-                    writer.writerow(card)
+                    # print(card)
+                    writer.writerow([card])
 
                 f.seek(0)
                 response = HttpResponse(f, content_type='text/csv')
@@ -212,43 +233,27 @@ def get_owned_cards(request):
 
 
 @login_required
-@user_passes_test(is_officer)
-def open_canvas(request):
-
-    if request.method == 'GET':
-        if 'account_name' in request.GET:
-
-            account_name = request.GET['account_name']
-
-            try:
-                account = GameAccount.objects.get(name=account_name)
-                ActionLog.objects.create(user_id=request.user.id, event='Canvas', target=account)
-                return redirect(account.canvas)
-
-            except GameAccount.DoesNotExist:
-                pass
-
-
-@login_required
 def user_accounts(request):
-
     add_account_form = GameAccountForm(prefix='add_account')
     add_account_basic_form = GameAccountBasicForm(prefix='add_account_basic')
     allow_command_form = AllowCommandForm(prefix='allow_command')
-    show_canvas_form = ShowCanvasForm(prefix='show_canvas')
+    upload_inventory_form = UploadInventoryForm(prefix='upload_inventory')
+    change_guild_form = ChangeGuildForm(prefix='change_guild')
 
     if request.method == 'POST':
+
+        # print(request.POST)
 
         if 'add_account' in request.POST:
             add_account_form = GameAccountForm(request.POST, prefix='add_account')
 
             if add_account_form.is_valid():
-                print add_account_form.errors
+                # print(add_account_form.errors)
                 account = add_account_form.save(commit=False)
                 tyrant_api = tyrant_utils.TyrantAPI()
-                canvas_params = tyrant_api.get_canvas_params(add_account_form['canvas'].value())
-                account.kong_name = str(canvas_params['kongregate_username'][0])
-                account.postdata = tyrant_api.get_postdata(add_account_form['canvas'].value())
+                postdata_params = tyrant_api.get_postdata_params(add_account_form['postdata'].value())
+                account.kong_name = str(postdata_params['kong_name'][0])
+                account.postdata = add_account_form['postdata'].value()
                 account_params = tyrant_api.create_request('init', account.postdata)
                 account.name = str(account_params['user_data']['name'])
                 try:
@@ -261,14 +266,15 @@ def user_accounts(request):
 
             add_account_basic_form = GameAccountBasicForm(prefix='add_account_basic')
             allow_command_form = AllowCommandForm(prefix='allow_command')
-            show_canvas_form = ShowCanvasForm(prefix='show_canvas')
+            upload_inventory_form = UploadInventoryForm(prefix='upload_inventory')
+            change_guild_form = ChangeGuildForm(prefix='change_guild')
 
         elif 'add_account_basic' in request.POST:
 
             add_account_basic_form = GameAccountBasicForm(request.POST, prefix='add_account_basic')
 
             if add_account_basic_form.is_valid():
-                print add_account_basic_form.errors
+                # print(add_account_basic_form.errors)
                 account = add_account_basic_form.save(commit=False)
                 account.user = request.user
                 account.save()
@@ -276,7 +282,8 @@ def user_accounts(request):
 
             add_account_form = GameAccountForm(prefix='add_account')
             allow_command_form = AllowCommandForm(prefix='allow_command')
-            show_canvas_form = ShowCanvasForm(prefix='show_canvas')
+            upload_inventory_form = UploadInventoryForm(prefix='upload_inventory')
+            change_guild_form = ChangeGuildForm(prefix='change_guild')
 
         elif 'allow_command' in request.POST:
 
@@ -297,31 +304,55 @@ def user_accounts(request):
 
             add_account_form = GameAccountForm(prefix='add_account')
             add_account_basic_form = GameAccountBasicForm(prefix='add_account_basic')
-            show_canvas_form = ShowCanvasForm(prefix='show_canvas')
+            upload_inventory_form = UploadInventoryForm(prefix='upload_inventory')
+            change_guild_form = ChangeGuildForm(prefix='change_guild')
 
-        elif 'show_canvas' in request.POST:
+        elif 'upload_inventory' in request.POST:
+
+            # print(request.POST)
 
             instance = GameAccount.objects.get(kong_name=request.POST['kong_name'])
-            show_canvas_form = ShowCanvasForm(request.POST, prefix='show_canvas', instance=instance)
+            upload_inventory_form = UploadInventoryForm(request.POST, prefix='upload_inventory', instance=instance)
 
-            if show_canvas_form.is_valid():
-                if request.POST.get('show_canvas', False):
-                    canvas_form = show_canvas_form.save(commit=False)
-                    canvas_form.show_canvas = True
-                    canvas_form.save()
-                else:
-                    canvas_form = show_canvas_form.save(commit=False)
-                    canvas_form.show_canvas = False
-                    canvas_form.save()
+            if upload_inventory_form.is_valid():
+                # print(upload_inventory_form.errors)
+                upload_inventory_form.save(commit=True)
+                #
+                # cards_list = upload_inventory_form['inventory'].value().splitlines()
+                #
+                # inventory_form.inventory = cards_list
 
                 return HttpResponseRedirect('/profile/accounts/')
 
             add_account_form = GameAccountForm(prefix='add_account')
             add_account_basic_form = GameAccountBasicForm(prefix='add_account_basic')
             allow_command_form = AllowCommandForm(prefix='allow_command')
+            change_guild_form = ChangeGuildForm(prefix='change_guild')
+
+        elif 'kong_name' in request.POST:
+
+            # print(request.POST)
+
+            instance = GameAccount.objects.get(kong_name=request.POST['kong_name'])
+            change_guild_form = ChangeGuildForm(request.POST, prefix='change_guild', instance=instance)
+
+            if change_guild_form.is_valid():
+                guild_form = change_guild_form.save(commit=False)
+                guild_form.guild = request.POST['change_guild']
+                guild_form.save()
+
+                return HttpResponseRedirect('/profile/accounts')
+
+            else:
+                print(change_guild_form.errors)
+
+            add_account_form = GameAccountForm(prefix='add_account')
+            add_account_basic_form = GameAccountBasicForm(prefix='add_account_basic')
+            allow_command_form = AllowCommandForm(prefix='allow_command')
+            upload_inventory_form = UploadInventoryForm(prefix='upload_inventory')
 
     try:
-        accounts = GameAccount.objects.filter(user=request.user)
+        accounts = GameAccount.objects.filter(user=request.user).order_by('name')
 
     except GameAccount.DoesNotExist:
         pass
@@ -330,24 +361,42 @@ def user_accounts(request):
                                                   'add_account_form': add_account_form,
                                                   'add_account_basic_form': add_account_basic_form,
                                                   'allow_command_form': allow_command_form,
-                                                  'show_canvas_form': show_canvas_form,
+                                                  'upload_inventory_form': upload_inventory_form,
+                                                  'change_guild_form': change_guild_form,
                                                   })
 
 
 @login_required
 def user_decks(request):
+    structures = [
+        'Tesla Coil-4',
+        'Minefield-4',
+        'Foreboding Archway-4',
+        'Forcefield-4',
+        'Illuminary Blockade-4',
+        'Inspiring Altar-4',
+        'Death Factory-4',
+        'Lightning Cannon-4',
+        'Sky Fortress-4',
+        'Mortar Tower-4',
+        'Corrosive Spore-4'
+    ]
 
     if request.method == 'POST':
 
         if 'add_deck' in request.POST:
             card_reader = tyrant_utils.CardReader()
-            post_name_id = request.POST.get('add_deck-name')
+            post_name_id = request.POST.get('add_deck-name').encode('utf-8')
             post_name = GameAccount.objects.get(id=post_name_id).name
             post_mode = request.POST.get('add_deck-mode')
             post_type = request.POST.get('add_deck-type')
             post_bge = request.POST.get('add_deck-bge')
-            post_friendly_structures = request.POST.get('add_deck-friendly_structures')
-            post_enemy_structures = request.POST.get('add_deck-enemy_structures')
+            post_friendly_structures_list = request.POST.get('add_deck-friendly_structures').split(",")
+            for idx, structure in enumerate(post_friendly_structures_list):
+                post_friendly_structures_list[idx] = structure.strip().title() + "-4"
+            post_enemy_structures_list = request.POST.get('add_deck-enemy_structures').split(",")
+            for idx, structure in enumerate(post_enemy_structures_list):
+                post_enemy_structures_list[idx] = structure.strip().title() + "-4"
 
             try:
                 instance = Decks.objects.get(
@@ -355,26 +404,26 @@ def user_decks(request):
                     mode=post_mode,
                     type=post_type,
                     bge=card_reader.bge_to_dict(post_bge),
-                    friendly_structures=post_friendly_structures,
-                    enemy_structures=post_enemy_structures
+                    friendly_structures=", ".join(post_friendly_structures_list),
+                    enemy_structures=", ".join(post_enemy_structures_list)
                 )
-                print "Instance: ", instance
+                # print "Instance: ", instance
                 add_deck_form = DeckForm(request.POST, user=request.user, prefix='add_deck', instance=instance)
             except Decks.DoesNotExist:
                 add_deck_form = DeckForm(request.POST, user=request.user, prefix='add_deck')
-                print "Instance not found"
+                # print "Instance not found"
 
             if add_deck_form.is_valid():
-                print add_deck_form.errors
+                # print(add_deck_form.errors)
                 deck_form = add_deck_form.save(commit=False)
 
                 # Convert deck string into json format
                 cards_as_name = add_deck_form['deck'].value()
-                cards_as_name = cards_as_name.split(', ')
+                cards_as_name = cards_as_name.split(',')
 
                 deck = {
                     "commander": {
-                        "card_id": str(card_reader.card_name_to_id(cards_as_name[0])[0][0]),
+                        "card_id": str(card_reader.card_name_to_id(cards_as_name[0])),
                         "name": str(cards_as_name.pop(0))
                     },
                     "cards": [
@@ -383,8 +432,12 @@ def user_decks(request):
                 }
 
                 for card_name in cards_as_name:
-                    for returned_card_id, returned_card_name in card_reader.card_name_to_id(card_name):
-                        deck.setdefault("cards").append({"card_id": str(returned_card_id), "name": str(returned_card_name)})
+                    # for returned_card_id, returned_card_name in card_reader.card_name_to_id(card_name):
+                    returned_card_ids = card_reader.card_name_to_id(card_name)
+                    for card_id in returned_card_ids:
+                        deck.setdefault("cards").append(
+                            {"card_id": int(card_id[0]), "name": str(card_id[1])}
+                        )
 
                 # deck = json.dumps(deck)
                 deck_form.deck = deck
@@ -396,19 +449,27 @@ def user_decks(request):
 
                 deck_form.save()
                 deck_id = Decks.objects.get(
-                    name=post_name,
-                    mode=post_mode,
-                    type=post_type,
+                    name=deck_form.name.encode('utf-8'),
+                    mode=deck_form.mode,
+                    type=deck_form.type,
                     bge=card_reader.bge_to_dict(post_bge),
-                    friendly_structures=post_friendly_structures,
-                    enemy_structures=post_enemy_structures
+                    friendly_structures=deck_form.friendly_structures,
+                    enemy_structures=deck_form.enemy_structures
                 )
-                print "Deck ID:", deck_id.id
-                if deck_id.type == "Faction" and deck_id.mode == "Offense" and deck_id.bge == {"global": {"global_id": "", "name": "None"},"friendly": {"friendly_id": "","name": "None"},"enemy": {"enemy_id": "","name": "None"}} and deck_id.friendly_structures == "Inspiring Altar, Inspiring Altar" and deck_id.enemy_structures == "Minefield":
-                    print "Benchmark Offense Deck"
+                # print deck_form.friendly_structures
+                # print deck_form.enemy_structures
+                # print "Deck ID:", deck_id.id
+                if deck_id.type == "Faction" and deck_id.mode == "Offense" and deck_id.bge == {
+                    "global": {"global_id": "", "name": "None"}, "friendly": {"friendly_id": "", "name": "None"},
+                    "enemy": {"enemy_id": "",
+                              "name": "None"}} and deck_id.friendly_structures == "Sky Fortress-4, Sky Fortress-4" and deck_id.enemy_structures == "Illuminary Blockade-4":
+                    # print "Benchmark Offense Deck"
                     benchmark_offense_sim.delay(add_deck_form['deck'].value(), deck_id.id)
-                if deck_id.type == "Faction" and deck_id.mode == "Defense" and deck_id.bge == {"global": {"global_id": "", "name": "None"},"friendly": {"friendly_id": "","name": "None"},"enemy": {"enemy_id": "","name": "None"}} and deck_id.friendly_structures == "Minefield" and deck_id.enemy_structures == "Inspiring Altar, Inspiring Altar":
-                    print "Benchmark Defense Deck"
+                if deck_id.type == "Faction" and deck_id.mode == "Defense" and deck_id.bge == {
+                    "global": {"global_id": "", "name": "None"}, "friendly": {"friendly_id": "", "name": "None"},
+                    "enemy": {"enemy_id": "",
+                              "name": "None"}} and deck_id.friendly_structures == "Illuminary Blockade-4" and deck_id.enemy_structures == "Sky Fortress-4, Sky Fortress-4":
+                    # print "Benchmark Defense Deck"
                     benchmark_defense_sim.delay(add_deck_form['deck'].value(), deck_id.id)
                 return HttpResponseRedirect('/profile/decks/')
 
@@ -417,11 +478,13 @@ def user_decks(request):
         add_deck_form = DeckForm(prefix='add_deck', user=request.user)
 
     try:
-        accounts = GameAccount.objects.filter(user=request.user).values_list('name', flat=True)
+        accounts = GameAccount.objects.filter(user=request.user).values_list('name'.encode('utf-8'),
+                                                                             flat=True).order_by('name')
         # print accounts
         decks = Decks.objects.filter(name__in=accounts).values()
 
         for deck in decks:
+            print "Deck:", deck
 
             card_list = [deck['deck']["commander"]["name"]]
 
@@ -432,8 +495,8 @@ def user_decks(request):
             deck['deck'] = card_names
 
             bge_names = "Global: " + str(deck["bge"]["global"]["name"] +
-                        ", Friendly: " + str(deck["bge"]["friendly"]["name"] +
-                        ", Enemy: " + str(deck["bge"]["enemy"]["name"])))
+                                         ", Friendly: " + str(deck["bge"]["friendly"]["name"] +
+                                                              ", Enemy: " + str(deck["bge"]["enemy"]["name"])))
 
             deck['bge'] = bge_names
 
@@ -447,7 +510,6 @@ def user_decks(request):
 
 @login_required
 def benchmarks(request):
-
     benchmarks_queryset = Benchmarks.objects.all()  # Get Database query set
 
     from collections import defaultdict
@@ -508,36 +570,84 @@ def benchmarks(request):
 
 @login_required
 def ranks_war(request):
+    from collections import defaultdict
 
     war_data = WarStats.objects.order_by('date').values()
-    totals_data = {}
+    stats_construct = defaultdict(list)
 
-    print "War Data:", war_data
+    # print("War Data:", war_data)
 
     for war in war_data:
 
-        for player in war['data']:
-            player.update({'win_percent': round(float(player['wins']) / 20 * 100, 1)})
-            player.update({'defense_percent': round(float(player['defense_wins']) / int(player['defense_losses']) * 100, 1)})
+        member_data = []
+        # print "War:", war
 
-    return render(request, "ranks_war.html", {'war_data': war_data})
+        for player in war['data']:
+
+            member = {
+                "member_name": player['member_name'],
+                "wins": player['wins'],
+                "losses": player['losses'],
+                "attacks": player['wins'] + player['losses'],
+                "defend_wins": player['defend_wins'],
+                "defend_losses": player['defend_losses'],
+                "attacked": player['defend_wins'] + player['defend_losses']
+            }
+
+            try:
+                member.update(
+                    {'win_percent': round(float(player['wins']) / 20 * 100, 1)}
+                )
+            except ZeroDivisionError:
+                member.update(
+                    {'win_percent': 0}
+                )
+            try:
+                member.update(
+                    {'defend_percent': round(float(player['defend_wins']) / int(member['attacked']) * 100, 1)}
+                )
+            except ZeroDivisionError:
+                member.update(
+                    {'defend_percent': 100.0}
+                )
+
+            # member.update({'total_wins': player['wins']})
+
+            member_data.append(member)
+
+        member_data = sorted(member_data, key=lambda k: k['member_name'].lower())
+
+        stats_construct[war['name']].append([war['enemy_guild'], member_data])
+
+    # for war, enemies in stats_construct.items():
+    #     print war
+    #     member_totals = []
+    #     for enemy, player in enemies:
+    #         member_totals.append(
+    #             {"member_name": player["member_name"], "total_wins": player["wins"]}
+    #         )
+    #
+    #
+    # print(stats_construct)
+
+    return render(request, "ranks_war.html", {
+        'stats_construct': dict(stats_construct),
+    })
 
 
 @login_required
 def ranks_brawl(request):
-
     return render(request, "ranks_brawl.html", {})
 
 
 @login_required
 @user_passes_test(is_officer)
 def members(request):
-
     try:
         users = User.objects.all()
         users = users.exclude(username="james")
         users = users.order_by("username")
-        print users
+        # print users
 
     except User.DoesNotExist:
         pass
@@ -551,7 +661,6 @@ def members(request):
             is_active_form = UserIsActiveForm(request.POST, prefix='is_active')
 
             if is_active_form.is_valid():
-
                 return
 
     else:
@@ -565,7 +674,6 @@ def members(request):
 @login_required
 @user_passes_test(is_officer)
 def accounts_list(request):
-
     try:
         game_accounts = GameAccount.objects.all().order_by("name")
         action_log = ActionLog.objects.filter(event="Canvas").order_by('target_id', '-date').distinct('target_id')
@@ -581,7 +689,6 @@ def accounts_list(request):
 @login_required
 @user_passes_test(is_officer)
 def gauntlets(request):
-
     from datetime import datetime, timedelta
     from collections import Counter
 
@@ -601,16 +708,16 @@ def gauntlets(request):
             card_names = ', '.join(card_list)
             deck['deck'] = card_names
 
-            bge_names = "Global: " + str(deck['bge']["global"]["name"] +
-                        ", Friendly: " + str(deck['bge']["friendly"]["name"] +
-                        ", Enemy: " + str(deck['bge']["enemy"]["name"])))
+            bge_names = "Global: " + str(deck['bge']["global"]["name"] + ", Friendly: " + str(
+                deck['bge']["friendly"]["name"] + ", Enemy: " + str(deck['bge']["enemy"]["name"])))
 
             deck['bge'] = bge_names
 
         commander_count = Counter(commander_list)
         commander_dict = {}
         for commander in commander_count:
-            commander_dict.update({str(commander): round(float(commander_count[commander]) / sum(commander_count.itervalues()) * 100, 1)})
+            commander_dict.update(
+                {str(commander): round(float(commander_count[commander]) / sum(commander_count.itervalues()) * 100, 1)})
 
     except Decks.DoesNotExist:
         pass
@@ -620,11 +727,37 @@ def gauntlets(request):
                                               })
 
 
+@login_required
+@user_passes_test(is_force_user)
+def download(request):
+    import os
+
+    filename = "ThePyForce.zip"
+    restricted_directory = "/home/daeronalagos/webapps/static_media/restricted_downloads"
+
+    response = HttpResponse(content_type='application/force-download')
+    response['Content-Disposition'] = 'attachment; filename=%s' % filename
+    response['X-Sendfile'] = os.path.join(restricted_directory, filename)
+    return response
+
+
+@login_required
+def benchmark_gauntlet(request):
+    import os
+
+    filename = "customdecks_benchmark.txt"
+    directory = "/home/daeronalagos/webapps/static_media/restricted_downloads"
+
+    response = HttpResponse(content_type='application/force-download')
+    response['Content-Disposition'] = 'attachment; filename=%s' % filename
+    response['X-Sendfile'] = os.path.join(directory, filename)
+    return response
+
+
 # API VIEWS #
 
 @api_view(['GET', 'POST'])
 def deckslist(request):
-
     if request.method == 'GET':
 
         if 'guild' and 'battle_type' and 'gbge' in request.GET:
@@ -644,8 +777,18 @@ def deckslist(request):
 
     elif request.method == 'POST':
 
+        # bge = json.loads(request.data['bge'])
+
         try:
-            instance = Decks.objects.get(name=request.data['name'], mode=request.data['mode'], type=request.data['type'], bge=request.data['bge'], friendly_structures=request.data['friendly_structures'], enemy_structures=request.data['enemy_structures'])
+            instance = Decks.objects.get(
+                name=request.data['name'],
+                mode=request.data['mode'],
+                type=request.data['type'],
+                bge=request.data['bge'],
+                # bge=bge,
+                friendly_structures=request.data['friendly_structures'],
+                enemy_structures=request.data['enemy_structures']
+            )
             serializer = DecksSerializer(instance, data=request.data)
 
         except Decks.DoesNotExist:
@@ -661,7 +804,6 @@ def deckslist(request):
 @api_view(['GET', ])
 @user_passes_test(is_force_user)
 def force_auth(request):
-
     if request.method == 'GET':
 
         if 'account_name' in request.GET:
@@ -681,3 +823,42 @@ def force_auth(request):
 
     content = {status.HTTP_403_FORBIDDEN: 'Permission Denied'}
     return Response(content)
+
+
+@api_view(['GET', ])
+@user_passes_test(is_officer)
+def api_account_list(request):
+    if request.method == 'GET':
+
+        user = request.user
+
+        if user.username == "DaeronAlagos":
+
+            decks = Decks.objects.filter(
+                mode="Offense").filter(
+                type="Faction").filter(
+                friendly_structures="Sky Fortress-4, Sky Fortress-4").filter(
+                enemy_structures="Illuminary Blockade-4"
+            )
+            accounts = GameAccount.objects.filter(name__in=decks.values('name'))
+
+            for account in accounts:
+
+                for deck in decks:
+
+                    if deck.name == account.name:
+
+                        card_list = [deck.deck["commander"]["name"]]
+
+                        for card in deck.deck["cards"]:
+                            card_list.append(card["name"])
+
+                        card_names = ', '.join(card_list)
+                        account.deck = card_names
+
+            serializer = AccountsSerializer(accounts, many=True)
+            return Response(serializer.data)
+
+        else:
+            content = {status.HTTP_403_FORBIDDEN: 'Permission Denied'}
+            return Response(content)

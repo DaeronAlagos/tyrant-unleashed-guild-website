@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% load staticfiles %}
+{% load filters %}
 
 {% block title %}Conquest Overview{% endblock %}
 
@@ -32,7 +33,7 @@
                 {% for zone, data in zone_data.items %}
 
                 <div class="col-sm-3">
-                    <h4 class="text-center padding-3">{{ zone }}<a href="{% url 'command' %}" class="btn btn-xs btn-danger" data-toggle="modal" data-target="#myModal">Attack</a></h4>
+                    <h4 class="text-center padding-3">{{ zone }}<a href="#" class="btn btn-xs btn-danger float-right" data-toggle="modal" data-target="#myModal">Attack</a></h4>
                 <div class="table-responsive">
                 <table class="table size-11">
                 <tbody>
@@ -41,9 +42,12 @@
                         <td class="bold">{{ guild.rank }}</td>
                         <td>{{ guild.influence }}</td>
                         <td class="text-right"> {{ guild.name }}
-                            {% if 'MasterJedis' in guild.name %}<span class="badge badge-green">&nbsp;</span>{% elif guild.name in enemy_guilds %}<span class="badge badge-red">&nbsp;</span>{% endif %}
+                            {% if 'MasterJedis' in guild.name or 'Quasar' in guild.name %}<span class="badge badge-green">&nbsp;</span>{% elif guild.name in enemy_guilds %}<span class="badge badge-red">&nbsp;</span>{% endif %}
                         </td>
                     </tr>
+                        {% if forloop.counter|divisibleby:5 %}
+                        <tr bgcolor="#EEE"><td></td><td></td><td></td></tr>
+                        {% endif %}
                     {% endfor %}
                 </tbody>
                 </table>

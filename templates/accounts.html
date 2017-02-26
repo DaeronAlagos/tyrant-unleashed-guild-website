@@ -6,23 +6,7 @@
 
 {% block body_block %}
 
-    <!--
-        PAGE HEADER
-
-        CLASSES:
-            .page-header-xs	= 20px margins
-            .page-header-md	= 50px margins
-            .page-header-lg	= 80px margins
-            .page-header-xlg= 130px margins
-            .dark			= dark page header
-
-            .shadow-before-1 	= shadow 1 header top
-            .shadow-after-1 	= shadow 1 header bottom
-            .shadow-before-2 	= shadow 2 header top
-            .shadow-after-2 	= shadow 2 header bottom
-            .shadow-before-3 	= shadow 3 header top
-            .shadow-after-3 	= shadow 3 header bottom
-    -->
+    <!-- PAGE HEADER -->
     <section class="page-header page-header-xs">
         <div class="container">
 
@@ -39,54 +23,40 @@
     </section>
     <!-- /PAGE HEADER -->
 
-    <!-- -->
     <section>
         <div class="container">
 
             <h4>Accounts</h4>
             {% if game_accounts %}
-            <div class="table-responsive">
-						<table class="table table-bordered table-striped table-vertical-middle">
-							<thead>
-								<tr>
-									<th>Name</th> <!-- class="width-30" -->
-									<th class="width-200">Owner</th>
-									<th class="width-200">Guild</th>
-                                    <th class="width-200">Owned Cards</th>
-                                    <th class="width-200">Canvas</th>
-								</tr>
-							</thead>
-							<tbody>
-                                {% for game_account in game_accounts %}
-								<tr>
-									<td>{{ game_account.name }}</td>
-									<td>{{ game_account.user.username }}</td>
-									<td>{{ game_account.guild }}</td>
-                                    <td class="text-center">
+                <table class="table table-striped table-bordered table-hover" id="datatable_accounts">
+                    <thead>
+                        <tr>
+                            <th>Name</th> <!-- class="width-30" -->
+                            <th class="">Owner</th>
+                            <th class="">Guild</th>
+                            <th class="">Owned Cards</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for game_account in game_accounts %}
+                        <tr class="odd gradeX">
+                            <td>{{ game_account.name }}</td>
+                            <td>{{ game_account.user.username }}</td>
+                            <td>{{ game_account.guild }}</td>
+                            <td class="text-center">
 
-                                        {% if game_account.postdata %}
-                                            <a href="{% url 'owned_cards' %}?account_name={{ game_account.name }}" class="btn btn-info btn-reveal btn-sm">
-                                                <i class="et-document"></i>
-                                                <span>Download</span>
-                                            </a>
-                                        {% endif %}
+                                {% if game_account.postdata or game_account.inventory %}
+                                    <a href="{% url 'owned_cards' %}?account_name={{ game_account.name }}" class="btn btn-info btn-reveal btn-sm">
+                                        <i class="et-document"></i>
+                                        <span>Download</span>
+                                    </a>
+                                {% endif %}
 
-                                    </td>
-                                    <td class="text-center">
-                                        {% if game_account.show_canvas %}
-                                            <a href="{% url 'open_canvas' %}?account_name={{ game_account.name }}" target="_blank" class="btn btn-warning btn-xs width-100">Canvas</a>
-                                            {% for action in action_log %}
-                                                {% if action.target_id == game_account.id %}
-                                                    <br><span class="size-11"><strong>{{ action.user.username }}</strong>  {{ action.date|date:"d/m/Y" }} {{ action.date|date:"H:i" }}</span>
-                                                {% endif %}
-                                            {% endfor %}
-                                        {% endif %}
-                                    </td>
-								</tr>
-                                {% endfor %}
-							</tbody>
-						</table>
-					</div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             {% else %}
                 <div class="alert alert-danger margin-bottom-30"><!-- DANGER -->
                     <strong>Oh snap!</strong> There are no accounts to show!
@@ -95,5 +65,51 @@
             {% endif %}
         </div>
     </section>
+
+{% endblock %}
+
+{% block script_block %}
+
+    <link href="{% static "css/layout-datatables.css" %}" rel="stylesheet" type="text/css"/>
+
+    <script type="text/javascript" src="{% static "plugins/datatables/js/jquery.dataTables.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "plugins/datatables/js/dataTables.tableTools.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "plugins/datatables/js/dataTables.colReorder.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "plugins/datatables/js/dataTables.scroller.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "plugins/datatables/dataTables.bootstrap.js" %}"></script>
+    <script type="text/javascript" src="{% static "plugins/select2/js/select2.full.min.js" %}"></script>
+    <script type="text/javascript">
+
+		function initTable1() {
+			var table = jQuery('#datatable_accounts');
+
+			/* Table tools samples: https://www.datatables.net/release-datatables/extras/TableTools/ */
+
+			/* Set tabletools buttons and button container */
+
+			var oTable = table.dataTable({
+				"order": [
+					[0, 'asc']
+				],
+
+				"lengthMenu": [
+					[10, 25, 50, -1],
+					[10, 25, 50, "All"] // change per page values here
+				],
+				// set the initial value
+				"pageLength": 25,
+
+				"dom": "<'row'<'col-md-6 col-sm-12'l><'col-md-6 col-sm-12'f>r>t<'row'<'col-md-5 col-sm-12'i><'col-md-7 col-sm-12'p>>", // datatable layout without  horizontal scroll
+
+			});
+
+			var tableWrapper = jQuery('#datatable_accounts_wrapper'); // datatable creates the table wrapper by adding with id {your_table_jd}_wrapper
+
+			tableWrapper.find('.dataTables_length select').select2(); // initialize select2 dropdown
+		}
+
+		// Table Init
+		initTable1();
+</script>
 
 {% endblock %}

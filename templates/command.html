@@ -1,16 +1,25 @@
 <div class="table-responsive">
-    <table class="table size-11">
-    <tbody>
-        {% for account in account_data %}
-        <tr>
-            <td class="size-14">{{ account.name }}</td>
-            <td><div class="progress">
-	<div class="progress-bar" role="progressbar" aria-valuenow="{{ account.stamina }}" aria-valuemin="0" aria-valuemax="25" style="width: {{ account.stamina }}%; min-width: 2em;">
-		{{ account.stamina }}
-	</div>
-</div></td>
-        </tr>
-        {% endfor %}
-    </tbody>
+    <div class="heading-title heading-border-bottom padding-3 text-center">
+	    <h3>{{ zone }}</h3>
+    </div>
+    <table class="table table table-striped table-bordered table-hover size-11">
+        <tbody>
+        {% if account_data %}
+            {% for account in account_data %}
+            <tr>
+                <td class="size-14">{{ account.name }}</td>
+                <td>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="{{ account.stamina }}" aria-valuemin="0" aria-valuemax="25" style="width: {{ account.stamina }}%; min-width: 2em;">
+                            {{ account.stamina }}
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <h4>No decks available</h4>
+        {% endif %}
+        </tbody>
     </table>
 </div>

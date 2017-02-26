@@ -43,6 +43,20 @@
 
                 {% endif %}
 
+                {% if upload_inventory_form.errors %}
+
+                    <div class="alert alert-danger margin-bottom-30"><!-- DANGER -->
+                        <ul>
+                        {% for field in upload_inventory_form %}
+                            {% if field.errors %}
+                                <li>{{ field.errors|striptags }}</li>
+                            {% endif %}
+                        {% endfor %}
+                        </ul>
+                    </div>
+
+                {% endif %}
+
                 {{ get_owned_cards_form.errors }}
                 {{ get_owned_cards_form.non_field_errors }}
 
@@ -62,33 +76,7 @@
                                             <div class="panel panel-default">
                                                 <div class="panel-heading panel-heading-transparent">
 
-                                                    <a href="{% url 'delete_account' %}?account_name={{ account.name }}" class="btn btn-danger btn-xs pull-right">Delete</a>
-                                                    <h2 class="panel-title">Canvas Link</h2>
-                                                </div>
 
-                                                <div class="panel-body" style="word-break: break-all">
-                                                    {{ account.canvas }}
-                                                </div>
-
-                                                <div class="panel-footer">
-                                                    <div class="text-right">
-                                                        <form role="form" action="{% url "user_accounts" %}" method="post" id="show_canvas_form" class="margin-bottom-0">
-
-                                                            <label class="switch switch">
-                                                                <input id="id_show_canvas" class="show_canvas" value="{{ account.kong_name }}" type="checkbox" {% if account.show_canvas %}checked{% endif %}>
-                                                                <span class="switch-label" data-on="YES" data-off="NO"></span>
-                                                                <span> Allow Officers to view Canvas</span>
-                                                            </label>
-
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="panel panel-default">
-                                                <div class="panel-heading panel-heading-transparent">
-
-                                                    <a href="{% url 'update_postdata' %}?account_name={{ account.name }}" class="btn btn-success btn-xs pull-right">Update Postdata</a>
                                                     <h2 class="panel-title">PostData</h2>
                                                 </div>
 
@@ -97,6 +85,8 @@
                                                 </div>
 
                                                 <div class="panel-footer">
+{#                                                <a href="{% url 'update_postdata' %}?account_name={{ account.name }}" class="btn btn-success btn-xs pull-right">Update Postdata</a>#}
+                                                    <a href="{% url 'delete_account' %}?account_name={{ account.name }}" class="btn btn-danger btn-xs pull-right">Delete</a>
                                                     <div class="text-right">
                                                         <form role="form" action="{% url "user_accounts" %}" method="post" id="allow_command_form" class="margin-bottom-0">
 
@@ -113,31 +103,72 @@
 
                                             </div>
 
-                                                <a href="{% url 'owned_cards' %}?account_name={{ account.name }}" class="btn btn-info btn-block">Download Owned Cards</a>
+                                                <a href="{% url 'owned_cards' %}?account_name={{ account.name }}" class="btn btn-primary btn-block">Download Owned Cards</a>
 
                                         {% else %}
 
-{#                                            <div class="fancy-form">#}
-{#                                                <textarea rows="5" class="form-control word-count" data-info="textarea-words-info" placeholder="Enter cards here, one card per line"></textarea>#}
-{##}
-{#                                                <i class="fa fa-list"><!-- icon --></i>#}
-{##}
-{#                                                <span class="fancy-hint size-11 text-muted">#}
-{#                                                    <strong>Hint:</strong> For multiple copies use 'Card Name #2'#}
-{#                                                </span>#}
-{##}
-{#                                                <form role="form" method="post" id="upload_owned_cards_form" action="{% url 'user_accounts' %}">#}
-{#                                                    {% csrf_token %}#}
-{##}
-{##}
-{#                                                    <br>#}
-{#                                                    <button type="submit" value="Submit" name="upload_owned_cards" class="btn btn-info btn-block">Update</button>#}
-{##}
-{#                                                </form>#}
-{##}
-{#                                            </div>#}
+                                            <div class="panel panel-default">
 
-                                            <a href="{% url 'delete_account' %}?account_name={{ account.name }}" class="btn btn-danger btn-block">Delete</a>
+                                                <div class="panel-heading panel-heading-transparent">
+                                                    <h2 class="panel-title">Inventory</h2>
+                                                </div>
+
+                                                <div class="panel-body">
+
+                                                    <form role="form" method="post" id="upload_inventory_form" action="{% url 'user_accounts' %}">
+
+                                                        <div class="fancy-form">
+
+                                                            {% csrf_token %}
+                                                            <input name="kong_name" value="{{ account.kong_name }}" type="hidden">
+
+                                                            {{ upload_inventory_form }}
+                                                            <span class="fancy-hint size-11 text-muted">
+                                                                <strong>Hint:</strong> For multiple copies use 'Card Name #2'
+                                                            </span>
+
+                                                            <br>
+                                                            <div class="col-lg-6 col-md-6 col-sm-6">
+                                                                <button type="submit" value="Submit" name="upload_inventory" class="btn btn-info btn-block">Save</button>
+                                                            </div>
+                                                            <div class="col-lg-6 col-md-6 col-sm-6">
+                                                                <a href="{% url 'owned_cards' %}?account_name={{ account.name }}" class="btn btn-primary btn-block">Download Owned Cards</a>
+                                                            </div>
+
+                                                        </div>
+                                                    </form>
+
+                                                    <br>
+
+                                                </div>
+
+                                            </div>
+
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading panel-heading-transparent">
+                                                    <h2 class="panel-title">Account</h2>
+                                                </div>
+
+                                                <div class="panel-body">
+
+                                                    <h5>Change Guild</h5>
+                                                    <form role="form" method="post" id="change_guild_form" action="{% url 'user_accounts' %}">
+
+                                                        <div class="fancy-form fancy-form-select">
+
+                                                            <input id="id_change_guild" value="{{ account.kong_name }}" type="hidden">
+                                                            {{ change_guild_form.guild }}
+                                                            <i class="fancy-arrow"></i>
+
+                                                        </div>
+
+                                                    </form>
+
+                                                    <h5>Delete Account</h5>
+                                                    <a href="{% url 'delete_account' %}?account_name={{ account.name }}" class="btn btn-danger btn-block">Delete</a>
+
+                                                </div>
+                                            </div>
 
                                         {% endif %}
 
@@ -251,9 +282,8 @@
                     });
                 }
             });
-        });
 
-        $(document).ready(function(){
+
             $(".show_canvas").bind('click', function() {
                 if($(this).is(":checked")) {
                     $.ajax({
@@ -268,6 +298,15 @@
                         data: { kong_name:$(this).attr("value"), show_canvas:"" }
                     });
                 }
+            });
+
+            $(".change_guild").bind('change', function() {
+                    $.ajax({
+                        url: '{% url "user_accounts" %}',
+                        type: 'POST',
+                        data: { kong_name:$(this).parent().find("#id_change_guild").val(), change_guild:$(this).val() }
+{#                        data: { kong_name:$('#id_change_guild').val(), change_guild:$('#id_change_guild-guild').val() }#}
+                    });
             });
         });
 

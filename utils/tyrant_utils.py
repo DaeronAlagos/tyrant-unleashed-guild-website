@@ -6,6 +6,7 @@ import time
 import hashlib
 import os
 import xmltodict
+from xml.etree import cElementTree as Et
 import re
 import glob
 import datetime
@@ -34,6 +35,11 @@ class TyrantAPI(object):
 
         canvas_params = urlparse.parse_qs(urlparse.urlparse(canvas).query)
         return canvas_params
+
+    def get_postdata_params(self, postdata):
+
+        postdata_params = urlparse.parse_qs(postdata)
+        return postdata_params
 
     def get_postdata(self, canvas):  # Prepare initial postdata to send
 
@@ -123,7 +129,7 @@ class TyrantAPI(object):
                                }
 
         new_postdata = urllib.urlencode(new_postdata_params)
-        url = '{0}?message={1}&user_id='.format(self.TOurl, message, self.user_id)
+        url = '{0}?message={1}&user_id={2}'.format(self.TOurl, message, self.user_id)
         request = urllib2.Request(url, new_postdata, self.header)
         response = urllib2.urlopen(request)
         response_data = json.loads(response.read())
@@ -138,12 +144,12 @@ class TyrantAPI(object):
         new_postdata_params = {'password': str(postdata_params['password'][0]),
                                'unity': str(self.settings['unity']),
                                'client_version': str(self.settings['client_version']),
-                               'api_stat_name': 'getConquestZoneTopLeaderboard',
+                               'api_stat_name': 'getConquestUpdate',
                                'api_stat_time': '',
                                'user_id': self.user_id,
                                'timestamp': timestamp,
-                               # 'hash': self.calculateMD5Hash(timestamp),
-                               # 'syncode': str(postdata_params['syncode'][0]),
+                               'hash': self.calculateMD5Hash(timestamp),
+                               'syncode': str(postdata_params['syncode'][0]),
                                'client_version': str(self.settings['client_version']),
                                'device_type': str(self.settings['device_type']),
                                'os_version': str(self.settings['os_version']),
@@ -158,7 +164,9 @@ class TyrantAPI(object):
                                }
 
         new_postdata = urllib.urlencode(new_postdata_params)
-        url = '{0}?message={1}&user_id='.format(self.TOurl, message, self.user_id)
+        # print("New Postdata:", new_postdata)
+        url = '{0}?message={1}&user_id={2}'.format(self.TOurl, message, self.user_id)
+        # print("URL:", url)
         request = urllib2.Request(url, new_postdata, self.header)
         response = urllib2.urlopen(request)
         response_data = json.loads(response.read())
@@ -184,49 +192,57 @@ class AccountDetails(object):
         # print("response data:", response_data)
 
         cards = {}
+        cards_list = []
         for (cid, value) in response_data['user_cards'].items():
             if int(value['num_owned']) > 0:
                 cards.update({cid: value['num_owned']})
 
+        card_faction = ['Imperial', 'Raider', 'Bloodthirsty', 'Xeno', 'Righteous', 'Progenitor']
+
         card_reader = CardReader()
 
-        card_faction = ['none', 'Imperial', 'Raider', 'Bloodthirsty', 'Xeno', 'Righteous', 'Progenitor']
-        get_cards_start = datetime.datetime.now()
-        for i in range(1, 7):
-            self.card_list.append(['// {0} //'.format(card_faction[i])])
-            for (cid, value) in cards.items():
-                self.unit_data = card_reader.card_id_to_name(cid)
-                print "Unit Data:", self.unit_data
-                # TODO: Make this work better
-                if not int(cid) == 31184:  # Neocyte Core
-                    if int(self.unit_data['type']) == i:
-                        if int(value) > 1:
-                            #print self.unit_data['card_name']
-                            if (int(self.unit_data['rarity']) == 1 and int(self.unit_data['level']) < 3) or (int(self.unit_data['rarity']) == 2 and int(self.unit_data['level']) < 4) or (int(self.unit_data['rarity']) > 2 and int(self.unit_data['level']) < 6):
-                                #print "{0}-{1} #{2}".format(self.unit_data['card_name'], self.unit_data['card_level'], value)
-                                self.card_list.append(['{0}-{1} #{2}'.format(self.unit_data['name'], self.unit_data['level'], value)])
-                            else:
-                                #print "{0} #{1}".format(self.unit_data['card_name'], value)
-                                self.card_list.append(['{0} #{1}'.format(self.unit_data['name'], value)])
-                        else:
-                            if (int(self.unit_data['rarity']) == 1 and int(self.unit_data['level']) < 3) or (int(self.unit_data['rarity']) == 2 and int(self.unit_data['level']) < 4) or (int(self.unit_data['rarity']) > 2 and int(self.unit_data['level']) < 6):
-                                #print "{0}-{1}".format(self.unit_data['card_name'], self.unit_data['card_level'])
-                                self.card_list.append(['{0}-{1}'.format(self.unit_data['name'], self.unit_data['level'])])
-                            else:
-                                #print "{0}".format(self.unit_data['card_name'])
-                                self.card_list.append(['{0}'.format(self.unit_data['name'])])
-                else:
-                    self.card_list.append(['Neocyte Core-2'])
+        for idx, faction in enumerate(card_faction):
+            cards_list.append(
+                '// {faction_name} //'.format(
+                    faction_name=faction
+                )
+            )
+            for cid, qty in cards.items():
+                card = card_reader.card_id_to_name(int(cid))
 
-        get_cards_end = datetime.datetime.now()
-        print "Time to get cards: ", get_cards_end - get_cards_start
-        return self.card_list
+                if int(card['card_type']) == idx + 1:
+                    if int(qty) > 1:
+                        if card['card_rarity'] == 1 and card['card_level'] < 3 or card['card_rarity'] == 2 and \
+                                        card['card_level'] < 4 or card['card_rarity'] > 2 and card['card_level'] < 6:
+                            cards_list.append("{card_name}-{card_level} #{quantity}".format(
+                                card_name=card['card_name'],
+                                card_level=card['card_level'],
+                                quantity=qty))
+                        else:
+                            cards_list.append("{card_name} #{card_quantity}".format(
+                                card_name=card['card_name'],
+                                card_quantity=qty
+                            ))
+                    elif int(qty) == 1:
+                        if card['card_rarity'] == 1 and card['card_level'] < 3 or card['card_rarity'] == 2 and \
+                                        card['card_level'] < 4 or card['card_rarity'] > 2 and card['card_level'] < 6:
+                            cards_list.append("{card_name}-{card_level}".format(
+                                card_name=card['card_name'],
+                                card_level=card['card_level']
+                            ))
+                        else:
+                            cards_list.append("{card_name}".format(
+                                card_name=card['card_name']
+                            ))
+
+        print "cards list:", cards_list
+        return cards_list
 
     def get_brawl_status(self, postdata):
 
         tyrant_api = TyrantAPI()
         response_data = tyrant_api.create_request('init', postdata)
-        print "Response Data:", response_data
+        # print "Response Data:", response_data
 
         brawl_rank = {'brawl_name': response_data['user_data']['name']}
         for key, value in response_data['player_brawl_data'].iteritems():
@@ -251,122 +267,131 @@ class ConquestUpdate(object):
 class CardReader(object):
 
     def __init__(self):
-        self.cardList = {}
 
-        self.xml_files = glob.glob(os.path.join(settings.BASE_DIR, 'utils/tuo/data/cards_section_?.xml'))
-        for self.xml_file in self.xml_files:
-            self.xml = open(self.xml_file, 'r')
-            self.xml_dict = xmltodict.parse(self.xml, encoding='utf-8')
-            for card in self.xml_dict['root']['unit']:
-                try:
-                    try:
-                        self.cardList.update({
-                            card['id']: {'name': card['name'], 'rarity': card['rarity'], 'level': unicode(1),
-                                         'set': card['set'], 'type': card['type'], 'fusion_level': card['fusion_level']}})
-                        try:
-                            for level in card['upgrade']:
-                                self.cardList.update({
-                                    level['card_id']: {'name': card['name'], 'rarity': card['rarity'],
-                                                       'level': level['level'],
-                                                       'set': card['set'], 'type': card['type'],
-                                                       'fusion_level': card['fusion_level']}})
-                        except:
-                            pass
-                    except:
-                        self.cardList.update({
-                            card['id']: {'name': card['name'], 'rarity': card['rarity'], 'level': unicode(1),
-                                         'set': card['set'], 'type': card['type']}})
-                        try:
-                            for level in card['upgrade']:
-                                self.cardList.update({
-                                    level['card_id']: {'name': card['name'], 'rarity': card['rarity'],
-                                                       'level': level['level'],
-                                                       'set': card['set'], 'type': card['type']}})
-                        except:
-                            pass
-                except:
-                    self.cardList.update(
-                        {card['id']: {'name': card['name'], 'rarity': card['rarity'], 'level': unicode(1),
-                                      'type': card['type']}})
-                    try:
-                        for level in card['upgrade']:
-                            self.cardList.update({
-                                level['card_id']: {'name': card['name'], 'rarity': card['rarity'],
-                                                   'level': level['level'], 'type': card['type']}})
-                    except:
-                        pass
+        try:
+            with open(os.path.join(settings.BASE_DIR, 'utils/tuo/data/all_cards.json')) as all_cards_file:
+                self.cards_list = json.load(all_cards_file)
+
+        except IOError:
+
+            self.create_all_cards_file()
+            with open(os.path.join(settings.BASE_DIR, 'utils/tuo/data/all_cards.json')) as all_cards_file:
+                self.cards_list = json.load(all_cards_file)
+
+    def create_all_cards_file(self):
+
+        xml_files = glob.glob(os.path.join(settings.BASE_DIR, 'utils/tuo/data/cards_section_*.xml'))
+        cards_list = list()
+
+        for xml_file in xml_files:
+            tree = Et.ElementTree(file=xml_file)
+
+            root = tree.getroot()
+            for unit in root:
+
+                cards_list.append(
+                    {
+                        "card_id": int(unit.find('id').text),
+                        "card_name": str(unit.find('name').text),
+                        "card_rarity": int(unit.find('rarity').text),
+                        "card_type": int(unit.find('type').text),
+                        "card_level": int(1)
+                    }
+                )
+
+                for upgrade in unit.findall('upgrade'):
+
+                    cards_list.append(
+                        {
+                            "card_id": int(upgrade.find('card_id').text),
+                            "card_name": str(unit.find('name').text),
+                            "card_rarity": int(unit.find('rarity').text),
+                            "card_type": int(unit.find('type').text),
+                            "card_level": int(upgrade.find('level').text)
+                        }
+                    )
+
+        with open(os.path.join(settings.BASE_DIR, 'utils/tuo/data/all_cards.json'), 'w') as all_cards_file:
+            json.dump(cards_list, all_cards_file, indent=4)
 
     def card_id_to_name(self, card_id):
 
-        return self.cardList.get(str(card_id))
+        return [matching for matching in self.cards_list if matching["card_id"] == card_id][0]
 
-    def card_name_to_id(self, card):
+        # return [matching['card_name'] + '-' + matching['card_level'] for matching in self.cards_list
+        #         if matching['card_id'] == card_id]
 
-        m = re.search(r'^\s?(.*?)-?(\d)?[ ]?#?(\d)?$', card)
+    def card_name_to_id(self, card_name):
+        m = re.search(r"^\s?(.*?[\d]?)(-\d)?[ ]?#?(\d{1,2})?$", card_name)
         name = unicode(m.group(1))
         cards = []
-        for (card_id, unit_data) in self.cardList.items():
-            if unit_data['name'] == name:
-                if int(unit_data['rarity']) == 1:
-                    if m.group(2) is None:
-                        level = 3
-                    else:
-                        level = m.group(2)
-                    break
-                if int(unit_data['rarity']) == 2:
-                    if m.group(2) is None:
-                        level = 4
-                    else:
-                        level = m.group(2)
-                    break
-                if int(unit_data['rarity']) > 2:
-                    if m.group(2) is None:
-                        level = 6
-                    else:
-                        level = m.group(2)
-                    break
-            if m.group(3) is not None:
-                amount = m.group(3)
-            else:
-                amount = 1
+
+        if m.group(2):
+            level = int(m.group(2)[1:])
+        else:
+            level = max([matching["card_level"] for matching in self.cards_list if matching["card_name"] == name])
+
+        if m.group(3):
+            amount = m.group(3)
+        else:
+            amount = 1
 
         for i in range(1, int(amount) + 1):
-            cards.extend([(card_id, name)])
+            cards.append(
+                ([matching["card_id"] for matching in self.cards_list if
+                 (matching["card_name"] == name and matching["card_level"]) == level][0], name)
+            )
 
-        # print "Returned Cards:", cards
         return cards
 
     def get_card_name(self, s):
         m = re.search(r'^\s?(.*?)-?(\d)?[ ]?#?(\d)?$', s)
         mx = [str(m.group(1)), str(m.group(2)), str(m.group(3))]
-        print "mx: ", mx
+        # print "mx: ", mx
         return mx
 
     def deck_as_names_to_ids(self, cards_as_name):
 
         cards = cards_as_name.split(',')
-        print cards
+        # print cards
         for card, qty in cards:
             return
 
     def bge_to_dict(self, bge):
 
-        # bge_list = add_deck_form['bge'].value()
-        bge_list = bge.split(', ')
+        if not bge:
+            bge_list = ["None", "None", "None"]
+        else:
+            bge_list = bge.split(', ')
 
         bge_as_dict = {
             "global": {
                 "global_id": "",
-                "name": str(bge_list[0])
+                "name": ""
             },
             "friendly": {
                 "friendly_id": "",
-                "name": str(bge_list[1])
+                "name": ""
             },
             "enemy": {
                 "enemy_id": "",
-                "name": str(bge_list[2])
+                "name": ""
             }
         }
+
+        try:
+            bge_as_dict["global"]["name"] = str(bge_list[0])
+        except IndexError:
+            bge_as_dict["global"]["name"] = "None"
+
+        try:
+            bge_as_dict["friendly"]["name"] = str(bge_list[1])
+        except IndexError:
+            bge_as_dict["friendly"]["name"] = "None"
+
+        try:
+            bge_as_dict["enemy"]["name"] = str(bge_list[2])
+        except IndexError:
+            bge_as_dict["enemy"]["name"] = "None"
 
         return bge_as_dict

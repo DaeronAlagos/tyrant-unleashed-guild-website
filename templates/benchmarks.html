@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% load staticfiles %}
+{% load filters %}
 
 {% block title %}Benchmarks{% endblock %}
 
@@ -22,42 +23,91 @@
     </section>
     <!-- /PAGE HEADER -->
 
-    <section>
+    <section class="info-bar info-bar-dark">
+
         <div class="container">
 
-        <h4>Benchmarks</h4>
+
+
+            <div class="row">
+
+                <div class="col-sm-3">
+
+                    <i class="glyphicon glyphicon-file"></i>
+                    <h3>DOWNLOAD THE GAUNTLET</h3>
+                    <br />
+                    <p><a href="{% url 'benchmark_gauntlet' %}" class="btn btn-block btn-info">Download</a></p>
+
+                </div>
+
+                <div class="col-sm-3">
+
+                    <i class="glyphicon glyphicon-info-sign"></i>
+                    <h3>THE OFFENSE COMMAND</h3>
+                    <br />
+                    <p>tuo "YOURDECK" "Benchmark" gw ordered yf "Sky Fortress, Sky Fortress" ef "Illuminary Blockade" -o=data/OWNEDCARDS _benchmark climb 1000</p>
+
+                </div>
+
+                <div class="col-sm-3">
+
+                    <i class="glyphicon glyphicon-info-sign"></i>
+                    <h3>THE DEFENSE COMMAND</h3>
+                    <br />
+                    <p>tuo "YOURDECK" "Benchmark" gw-defense enemy:ordered yf "Illuminary Blockade" ef "Sky Fortress, Sky Fortress" -o=data/OWNEDCARDS _benchmark climb 1000</p>
+
+                </div>
+
+                <div class="col-sm-3">
+
+                    <i class="glyphicon glyphicon-tower"></i>
+                    <h3>ADD YOUR DECKS</h3>
+                    <br />
+                    <p>Go to your Decks page and complete the form with the War settings and your deck will be scored and added to the table below</p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="padding-xxs noborder">
+        <div class="container">
+
             {% if benchmarks_accounts %}
 
-                <div class="table-responsive">
-                    <table class="table table-striped table-bordered table-hover" id="sample_1">
-                        <thead>
-                            <tr>
-                                <th>Rank</th>
-                                <th>Name</th> <!-- class="width-30" -->
-                                <th>Guild</th>
-                                <th>Total</th>
-                                <th>Offense</th>
-                                <th>Defense</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for account, data in benchmarks_accounts %}
-                            <tr>
+                <table class="table table-striped table-bordered table-hover" id="datatable_benchmarks" width="100%">
+                    <thead>
+                        <tr id="filter_row">
+                            <th></th>
+                            <th>Rank</th>
+                            <th>Name</th> <!-- class="width-30" -->
+                            <th>Guild</th>
+                            <th>Total</th>
+                            <th>Offense</th>
+                            <th>Defense</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for account, data in benchmarks_accounts %}
+                            <tr data-offense="{{ data.offense_deck }}" data-defense="{{ data.defense_deck }}" class="{{ data.defense_date|deck_age }} {{ data.offense_date|deck_age }}">
+                                <td class="details-control" style="cursor: pointer"><i class="fa fa-plus-square"></i></td>
                                 <td class="">{{ forloop.counter }}</td>
                                 <td class="">{{ account }}</td>
                                 <td class="">{{ data.guild }}</td>
                                 <td class="">{{ data.total }}</td>
-                                <td class=""><a href="#" data-toggle="tooltip" title="{{ data.offense_deck }}">{{ data.offense_score }}</a>
+                                <td>{{ data.offense_score }}
                                     <br><span class="size-11">{{ data.offense_date|date:"d/m/Y" }}</span>
                                 </td>
-                                <td class=""><a href="#" data-toggle="tooltip" title="{{ data.defense_deck }}">{{ data.defense_score }}</a>
+                                <td>{{ data.defense_score }}
                                     <br><span class="size-11">{{ data.defense_date|date:"d/m/Y" }}</span>
                                 </td>
                             </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
 
             {% else %}
 
@@ -71,5 +121,110 @@
         </div>
     </section>
 
+{% endblock %}
+
+{% block script_block %}
+
+    <link href="{% static "css/layout-datatables.css" %}" rel="stylesheet" type="text/css"/>
+
+    <script type="text/javascript" src="{% static "plugins/datatables/js/jquery.dataTables.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "plugins/datatables/js/dataTables.tableTools.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "plugins/datatables/js/dataTables.colReorder.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "plugins/datatables/js/dataTables.scroller.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "plugins/datatables/dataTables.bootstrap.js" %}"></script>
+    <script type="text/javascript" src="{% static "plugins/select2/js/select2.full.min.js" %}"></script>
+    <script type="text/javascript">
+
+        function format ( offense , defense ) {
+            return '<div><table class="table table-bordered">'+
+        '<tr>'+
+            '<td><i class="fa fa-bullseye"></i></td>'+
+            '<td>'+offense+'</td>'+
+        '</tr>'+
+        '<tr>'+
+            '<td><i class="fa fa-shield"></i></td>'+
+            '<td>'+defense+'</td>'+
+        '</tr>'+
+        '</table></div>';
+        }
+
+        $(document).ready(function () {
+
+			var table = jQuery('#datatable_benchmarks');
+
+			var oTable = table.DataTable({
+				"order": [
+					[4, 'dsc']
+				],
+				"lengthMenu": [
+					[10, 25, 50, -1],
+					[10, 25, 50, "All"] // change per page values here
+				],
+				// set the initial value
+				"pageLength": 25,
+                "sScrollX": '100%',
+				"dom": "<'row'<'col-md-6 col-sm-12'l><'col-md-6 col-sm-12'f>r>t<'row'<'col-md-5 col-sm-12'i><'col-md-7 col-sm-12'p>>", // datatable layout without horizontal scroll
+                "orderCellsTop": true,
+                "columns": [{
+                    "orderable": false
+                }, {
+                    "orderable": false
+                }, {
+                    "orderable": false
+                }, {
+                    "orderable": false
+                }, {
+                    "orderable": false
+                }, {
+                    "orderable": false
+                }, {
+                    "orderable": false
+                }]
+			});
+
+            var fTable = oTable.column(3).every( function () {
+                var column = this;
+                var select = $('<select style="width: 100%;"><option value=""></option></select>')
+                    .appendTo( $(column.header()).empty() )
+                    .on( 'change', function () {
+                        var val = $.fn.dataTable.util.escapeRegex(
+                            $(this).val()
+                        );
+
+                        column
+                            .search( val ? '^'+val+'$' : '', true, false )
+                            .draw();
+                    } );
+
+                column.data().unique().sort().each( function ( d, j ) {
+                    select.append( '<option value="'+d+'">'+d+'</option>' )
+                } );
+            } );
+
+			var tableWrapper = jQuery('#datatable_benchmarks_wrapper'); // datatable creates the table wrapper by adding with id {your_table_jd}_wrapper
+
+			tableWrapper.find('.dataTables_length select').select2(); // initialize select2 dropdown
+
+            $('#datatable_benchmarks tbody').on('click', 'td.details-control', function () {
+                var tr = $(this).closest('tr');
+                var row = oTable.row( tr );
+                var td = $(this);
+
+                if ( row.child.isShown() ) {
+                    // This row is already open - close it
+                    row.child.hide();
+                    tr.removeClass('shown');
+                    td.find('i').removeClass("fa fa-minus-square").addClass("fa fa-plus-square");
+                }
+                else {
+                    // Open this row
+                    row.child( format( tr.data('offense'), tr.data('defense') )).show();
+                    td.find('i').removeClass("fa fa-plus-square").addClass("fa fa-minus-square")
+                }
+
+            });
+		});
+
+</script>
 
 {% endblock %}

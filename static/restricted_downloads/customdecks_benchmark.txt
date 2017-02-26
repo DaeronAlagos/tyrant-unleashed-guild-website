@@ -1,0 +1,34 @@
+Benchmark_high:   /^Benchmark_high_\d\d$/
+Benchmark_high_01: Tabitha Exiled, Silver Vanguard, Primal Criterion, Silver Vanguard #3, Pillars of Cyprion
+Benchmark_high_02: Arkadios Ultra, Silver Vanguard, Primal Criterion #2, Oracle's Foresight, Therion Aethersworn, Thought Pilferer, Dire Xeboroid
+Benchmark_high_03: Typhon the Mad, Sin Swallower, Typhon's Progeny, Deadly Leaper, Silver Vanguard, Sulfuris Kintocid, Deadly Leaper, Sin Swallower, Sulfuris Kintocid, Deadly Leaper, Desert Gargantanid
+Benchmark_high_04: Lord Halcyon, Halcyon's Regiment, Bandit Life Stealer, Forged Rampart, Zookba Absolute, Bandit Life Stealer, Plutonitor, Eden's Promise, Pioneer Titus, Bandit Life Stealer #2
+Benchmark_high_05: Petrisis Gorefist, Typhon's Progeny #2, Primal Criterion, Ajaxion Tremendous, Primal Criterion #2
+Benchmark_high_06: Daedalus Enraged, Archduchess Erexin, Aurochs Turo #2, Warp Fabricator #2, Xetonic Sorcerer, Corona Crusher #2, Lakshmanrath
+Benchmark_high_07: Tabitha Exiled, Semtex Machine, Maximus Battleframe, Semtex Machine, Pillars of Cyprion, Blackmarsh Komodo, Neocyte Disarmer, Depths Nauticus, Pioneer Titus, Final Tribunal, Respitefire
+Benchmark_high_08: Councilor Constantine, Thanatos Maximum, Rukoshin Outfitted, Chaste TR-18, Rukoshin Outfitted, Dagger Pinion, Triggered Railcarbine, Jotun's Bastion, Triggered Railcarbine, Dagger Pinion, Cleric Transformer
+Benchmark_high_09: Typhon the Mad, Vespine Vertus, Sin Swallower, Oracle's Foresight, Sin Swallower, Primal Criterion, Oracle's Foresight, Vespine Vertus #2, Alaric's Parish, Tartarian Mollusk
+Benchmark_high_10: Daedalus Enraged, Aurochs Turo, Warp Fabricator #2, Erebus Mega City, Warp Fabricator, Nepthar Slugthrower, Primal Criterion, Flexframe Hexar, Tethys Ashore
+Benchmark_mid:   /^Benchmark_mid_\d\d$/
+Benchmark_mid_01: Typhon the Mad, Demolition Rig #2, Death Priest Lyon, City of Pandora, Demolition Rig #3, Rickety Rickshaw
+Benchmark_mid_02: Conqueror Krellus, Rukoshin Outfitted #4, Paladin's Barding, Triggered Railcarbine, Jotun's Bastion, Paladin's Barding #2, Rukoshin Outfitted
+Benchmark_mid_03: Nexor the Farseer, Vespine Vertus, Silver Vanguard, Alaric's Parish, Kobex Cryotech, Primal Criterion, Vespine Vertus #2, Warp Fabricator, Dire Xeboroid, Vespine Vertus
+Benchmark_mid_04: Arkadios Ultimate, Chaste TR-18, Cleric Transformer, Captain Beatrix XII #3, Jotun's Bastion, Ajaxion Tremendous, Primal Criterion #2, Cleric Transformer
+Benchmark_mid_05: Kylen the Initiator, Jorex's Anguish, Zuruwing Flock, Kobex Cryotech, Aurochs Turo, Flexframe Hexar, Erebus Mega City, Xebor Comet, Xeno Reanimator, Nimbi Drift, Flexframe Hexar
+Benchmark_mid_06: Typhon the Mad, Rukoshin Outfitted, Jotun's Bastion, Rukoshin Outfitted, Saint Mard's Casket, Stoic Golem, Ace Eradicator, Lens of Purgation, The Council's Keeper, Cleric Transformer
+Benchmark_mid_07: Daedalus Enraged, Cosmic Intensifier, Warp Fabricator, Erebus Mega City, Warp Fabricator, Loathe Abysswing #2, Chrysaora, Warp Fabricator
+Benchmark_mid_08: Sir Alaric, Shrouded Cherisher, Cleric Transformer, Captain Beatrix XII #4, Myrvern's Design, Cleric Transformer
+Benchmark_mid_09: Daedalus Enraged, Deadly Leaper, Asphodel's Last Hold, Deadly Leaper, Asphodel's Last Hold, Scatter Mangonel, Warp Fabricator #3, Nimbi Drift, Corpselouse
+Benchmark_mid_10: Daedalus Enraged, Cosmic Intensifier, Warp Fabricator, Erebus Mega City, Chrysaora, Loathe Abysswing #2, Warp Fabricator #2
+Benchmark_low:   /^Benchmark_low_\d\d$/
+Benchmark_low_01: Silus the Corrupt, Demolition Rig #3, Rumbler Rickshaw, City of Pandora, Igniting Cargo, Arin Dunestalker, Sinuous Dam
+Benchmark_low_02: Daedalus, Jotun's Bastion, Zuruwing Flock, Therion Aethersworn, Kobex Cryotech, Continent Quaker, Xeno Reanimator, Arsha Transcendent, Xeno Reanimator, Amon Matrix, Stonewall Garrison
+Benchmark_low_03: Imperator Halcyon, Semtex Machine, Maximus the Colossal, Tethys Ashore, Blackmarsh Komodo, Eden's Promise, Forged Rampart, Sovereign DX9, Pioneer Titus, Final Tribunal, Balor the Void Eye
+Benchmark_low_04: Daedalus Enraged, Halcyon's Regiment, Forged Rampart, Therion Aethersworn, Forged Rampart, Pioneer Titus, Stonewall Garrison, Agile Airship, Tyrian Deadeye, Stonewall Garrison
+Benchmark_low_05: Malort Blightmind, Brain Assimilator, Balethroat Arthrodon #2, Blightheart Archon #2, Brain Assimilator, Riptide Capsizer, Anathema of Tartarus, Formitaur Flanker
+Benchmark_low_06: Daedalus Enraged, Cosmic Intensifier, Vespine Vertus, Xebor Comet, Warp Fabricator #2, Erebus Mega City, Loathe Abysswing, Brandished Bayonet, Warp Fabricator, Krellus' Skyrender
+Benchmark_low_07: Dracorex Hivelord, Sin Swallower, Depth Riser, Junkyard Heap, Sulfuris Kintocid, Sin Swallower, Sulfuris Kintocid, Wyrm of the Pit, Plague Belcher, Depth Riser, Gloom Burster
+Benchmark_low_08: Councilor Constantine, Thanatos Maximum, Rukoshin Outfitted, Chaste TR-18, Stoic Golem, Triggered Railcarbine, Captain Beatrix XII #2, Jotun's Bastion, Paladin's Barding, Stoic Golem
+Benchmark_low_09: Dracorex Hivelord, Brain Assimilator, Sulfuris Kintocid, Balethroat Arthrodon #2, Blightheart Archon, Nepthar Shooter, Plague Belcher #2, Rumbler Rickshaw
+Benchmark_low_10: Daedalus Charged, Forged Rampart #4, Storm Regiment, Stonewall Garrison, Depths Nauticus, Pioneer Titus, Halcyon's Burden, Rigid Overtaker
+Benchmark:   /^(Benchmark_high|Benchmark_mid|Benchmark_low)$/
