@@ -22,24 +22,28 @@ from utils.tyrant_utils import CardReader
 def benchmark_offense_sim(deck, deck_id):
 
     import os
-    import subprocess
+    from subprocess import check_output as co
 
-    tuo_path = os.path.join(settings.BASE_DIR, 'utils/tuo/')
-    tuo_command = os.path.join(tuo_path, 'tuo.exe')
+    tuo_path = os.path.join(settings.BASE_DIR, "utils", "tuo")
+    tuo_command = os.path.join(tuo_path, "tuo.exe")
     friendly_offense_structures = "Sky Fortress, Sky Fortress"
-    enemy_defense_structures = "Illuminary Blockade"
+    enemy_defense_structures = "Foreboding Archway, Foreboding Archway"
     gauntlet = "Benchmark"
 
-    result = subprocess.check_output(tuo_command +
-                                     ' "{Seed}" "{GauntletOffense}" gw ordered yf "{friendly_offense_strucutures}"'
-                                     ' ef "{enemy_defense_structures}" _benchmark -t {Threads} sim {Iteration}'.format(
-                                         Seed=deck,
-                                         GauntletOffense=gauntlet,
-                                         friendly_offense_strucutures=friendly_offense_structures,
-                                         enemy_defense_structures=enemy_defense_structures,
-                                         Threads=1,
-                                         Iteration=1000),
-                                     shell=True, cwd=tuo_path).splitlines()
+    result = co(["{tuo_command}".format(tuo_command=tuo_command),
+                 "{seed}".format(seed=deck),
+                 "{GauntletOffense}".format(GauntletOffense=gauntlet),
+                 "gw",
+                 "ordered",
+                 "yf",
+                 "{friendly_offense_structures}".format(friendly_offense_structures=friendly_offense_structures),
+                 "ef",
+                 "{enemy_defense_structures}".format(enemy_defense_structures=enemy_defense_structures),
+                 "_benchmark",
+                 "-t",
+                 "{Threads}".format(Threads=1),
+                 "sim",
+                 "{Iteration}".format(Iteration=1000)], cwd=tuo_path, shell=True).splitlines()
     score = result[-3].split(': ')[1].split('(')[0]
     # print score
     Benchmarks.objects.update_or_create(deck_id=deck_id, defaults={'deck_id': deck_id, 'score': score})
@@ -49,25 +53,29 @@ def benchmark_offense_sim(deck, deck_id):
 def benchmark_defense_sim(deck, deck_id):
 
     import os
-    import subprocess
+    from subprocess import check_output as co
 
-    tuo_path = os.path.join(settings.BASE_DIR, 'utils/tuo/')
+    tuo_path = os.path.join(settings.BASE_DIR, "utils", "tuo")
     tuo_command = os.path.join(tuo_path, 'tuo.exe')
-    friendly_defense_structures = "Illuminary Blockade"
+    friendly_defense_structures = "Foreboding Archway"
     enemy_offense_structures = "Sky Fortress, Sky Fortress"
     gauntlet = "Benchmark"
 
-    result = subprocess.check_output(tuo_command +
-                                     ' "{Seed}" "{GauntletDefense}" gw-defense enemy:ordered'
-                                     ' yf "{friendly_defense_structures}" ef "{enemy_offense_structures}"'
-                                     ' -t {Threads} _benchmark sim {Iteration}'.format(
-                                         Seed=deck,
-                                         GauntletDefense=gauntlet,
-                                         friendly_defense_structures=friendly_defense_structures,
-                                         enemy_offense_structures=enemy_offense_structures,
-                                         Threads=1,
-                                         Iteration=1000),
-                                     shell=True, cwd=tuo_path).splitlines()
+    result = co([
+        "{tuo_command}".format(tuo_command=tuo_command),
+        "{seed]".format(seed=deck),
+        "{gauntlet_defense}".format(gauntlet_defense=gauntlet),
+        "gw-defense",
+        "enemy:ordered",
+        "yf",
+        "{friendly_defense_structures}".format(friendly_defense_structures=friendly_defense_structures),
+        "ef",
+        "{enemy_offense_structures}".format(enemy_offense_structures=enemy_offense_structures),
+        "-t",
+        "{threads}".format(threads=1),
+        "_benchmark",
+        "sim",
+        "{iterations}".format(iterations=1000)], cwd=tuo_path, shell=True).splitlines()
     # print result
     score = result[-3].split(': ')[1].split(' (')[0]
     # print score
@@ -79,16 +87,48 @@ def update_xmls():
 
     import os
     import urllib
-    xml_path = os.path.join(settings.BASE_DIR, 'utils/tuo/data')
+    xml_path = os.path.join(settings.BASE_DIR, "utils", "tuo", "data")
+    xml_files = [
+        "missions",
+        "tutorial",
+        "items",
+        "fusion_recipes_cj2",
+        "codex",
+        "levels",
+        "skills_set",
+    ]
 
     for i in range(1, 12 + 1):
+        xml_files.append(
+            "cards_section_{section_id}".format(
+                section_id=i
+            )
+        )
+
+    for xml_file in xml_files:
         try:
-            xml_source = urllib.urlopen("http://mobile-dev.tyrantonline.com/assets/cards_section_{0}.xml".format(
-                i)).read()
-            with open(os.path.join(xml_path, 'cards_section_{0}.xml'.format(i)), 'w') as xml_file:
-                xml_file.write(xml_source)
+            urllib.urlretrieve(
+                'http://mobile.tyrantonline.com/assets/{xml_file}.xml'.format(xml_file=xml_file),
+                filename=os.path.join(xml_path, '{xml_file}.xml'.format(xml_file=xml_file)))
         except IOError:
             pass
+
+    try:
+        urllib.urlretrieve(
+            'https://github.com/dsuchka/tyrant_optimize/blob/merged/data/raids.xml',
+            filename=os.path.join(xml_path, 'raids.xml')
+        )
+    except IOError:
+        pass
+
+    try:
+        urllib.urlretrieve(
+            'https://github.com/dsuchka/tyrant_optimize/blob/merged/data/bges.txt',
+            filename=os.path.join(xml_path, 'bges.txt')
+        )
+    except IOError:
+        pass
+
     card_reader = CardReader()
     card_reader.create_all_cards_file()
 
