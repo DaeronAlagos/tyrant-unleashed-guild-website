@@ -5,11 +5,9 @@ import json
 import time
 import hashlib
 import os
-import xmltodict
 from xml.etree import cElementTree as Et
 import re
 import glob
-import datetime
 from jedisite.models import TyrantSettings
 from django.conf import settings
 
@@ -18,17 +16,17 @@ class TyrantAPI(object):
 
     def __init__(self):
 
-        #settings = TyrantSettings.objects.all()  # Get values from database
         self.settings = dict(TyrantSettings.objects.values_list('name', 'value'))
         self.TOurl = 'http://mobile.tyrantonline.com/api.php'  # Tyrant Unleashed Web URL
-        self.header = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.73 Safari/537.36 OPR/34.0.2036.25',
-                           'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                           'Accept-Language': 'en-GB,en;q=0.5',
-                           'Host': 'mobile.tyrantonline.com',
-                           'Content-Type': 'application/x-www-form-urlencoded',
-                           'X-Unity-Version': '4.6.6f2',
-                           'Connection': 'keep-alive'
-                       }
+        self.header = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.73 Safari/537.36 OPR/34.0.2036.25',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-GB,en;q=0.5',
+            'Host': 'mobile.tyrantonline.com',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Unity-Version': '4.6.6f2',
+            'Connection': 'keep-alive'
+        }
         self.user_id = ''
 
     def get_canvas_params(self, canvas):  # Parse canvas link
@@ -179,64 +177,77 @@ class TyrantAPI(object):
 
 class AccountDetails(object):
 
-    def __init__(self):
+    def __init__(self, postdata):
 
-        self.card_list = []
+        self.postdata = postdata
+        self.owned_cards = self.get_owned_cards()
         self.unit_data = {}
 
-    def get_owned_cards(self, postdata):
+    def get_owned_cards(self):
 
         tyrant_api = TyrantAPI()
-        response_data = tyrant_api.create_request('init', postdata)
+        response_data = tyrant_api.create_request('init', self.postdata)
 
         # print("response data:", response_data)
 
-        cards = {}
-        cards_list = []
+        owned_cards = list()
         for (cid, value) in response_data['user_cards'].items():
             if int(value['num_owned']) > 0:
-                cards.update({cid: value['num_owned']})
+                owned_cards.append(
+                    {
+                        "card_id": cid,
+                        "quantity": value["num_owned"]
+                    }
+                )
+
+        return owned_cards
+
+    def format_inventory(self):
 
         card_faction = ['Imperial', 'Raider', 'Bloodthirsty', 'Xeno', 'Righteous', 'Progenitor']
 
         card_reader = CardReader()
+        inventory_items = list()
 
         for idx, faction in enumerate(card_faction):
-            cards_list.append(
+            inventory_items.append(
                 '// {faction_name} //'.format(
                     faction_name=faction
                 )
             )
-            for cid, qty in cards.items():
-                card = card_reader.card_id_to_name(int(cid))
+            for card in self.owned_cards:
+                card_data = card_reader.card_id_to_name(int(card["card_id"]))
+                quantity = card["quantity"]
 
-                if int(card['card_type']) == idx + 1:
-                    if int(qty) > 1:
-                        if card['card_rarity'] == 1 and card['card_level'] < 3 or card['card_rarity'] == 2 and \
-                                        card['card_level'] < 4 or card['card_rarity'] > 2 and card['card_level'] < 6:
-                            cards_list.append("{card_name}-{card_level} #{quantity}".format(
-                                card_name=card['card_name'],
-                                card_level=card['card_level'],
-                                quantity=qty))
+                if int(card_data['card_type']) == idx + 1:
+                    if int(quantity) > 1:
+                        if card_data['card_rarity'] == 1 and card_data['card_level'] < 3 or \
+                                                card_data['card_rarity'] == 2 and card_data['card_level'] < 4 or \
+                                                card_data['card_rarity'] > 2 and card_data['card_level'] < 6:
+                            inventory_items.append("{card_name}-{card_level} #{quantity}".format(
+                                card_name=card_data['card_name'],
+                                card_level=card_data['card_level'],
+                                quantity=quantity))
                         else:
-                            cards_list.append("{card_name} #{card_quantity}".format(
-                                card_name=card['card_name'],
-                                card_quantity=qty
+                            inventory_items.append("{card_name} #{card_quantity}".format(
+                                card_name=card_data['card_name'],
+                                card_quantity=quantity
                             ))
-                    elif int(qty) == 1:
-                        if card['card_rarity'] == 1 and card['card_level'] < 3 or card['card_rarity'] == 2 and \
-                                        card['card_level'] < 4 or card['card_rarity'] > 2 and card['card_level'] < 6:
-                            cards_list.append("{card_name}-{card_level}".format(
-                                card_name=card['card_name'],
-                                card_level=card['card_level']
+                    elif int(quantity) == 1:
+                        if card_data['card_rarity'] == 1 and card_data['card_level'] < 3 or \
+                                                card_data['card_rarity'] == 2 and card_data['card_level'] < 4 or \
+                                                card_data['card_rarity'] > 2 and card_data['card_level'] < 6:
+                            inventory_items.append("{card_name}-{card_level}".format(
+                                card_name=card_data['card_name'],
+                                card_level=card_data['card_level']
                             ))
                         else:
-                            cards_list.append("{card_name}".format(
-                                card_name=card['card_name']
+                            inventory_items.append("{card_name}".format(
+                                card_name=card_data['card_name']
                             ))
 
-        print "cards list:", cards_list
-        return cards_list
+        # print "cards list:", inventory_items
+        return inventory_items
 
     def get_brawl_status(self, postdata):
 
@@ -269,18 +280,18 @@ class CardReader(object):
     def __init__(self):
 
         try:
-            with open(os.path.join(settings.BASE_DIR, 'utils/tuo/data/all_cards.json')) as all_cards_file:
+            with open(os.path.join(settings.BASE_DIR, "utils", "tuo", "data", "all_cards.json")) as all_cards_file:
                 self.cards_list = json.load(all_cards_file)
 
         except IOError:
 
             self.create_all_cards_file()
-            with open(os.path.join(settings.BASE_DIR, 'utils/tuo/data/all_cards.json')) as all_cards_file:
+            with open(os.path.join(settings.BASE_DIR, "utils", "tuo", "data", "all_cards.json")) as all_cards_file:
                 self.cards_list = json.load(all_cards_file)
 
     def create_all_cards_file(self):
 
-        xml_files = glob.glob(os.path.join(settings.BASE_DIR, 'utils/tuo/data/cards_section_*.xml'))
+        xml_files = glob.glob(os.path.join(settings.BASE_DIR, "utils", "tuo", "data", "cards_section_*.xml"))
         cards_list = list()
 
         for xml_file in xml_files:
@@ -311,11 +322,12 @@ class CardReader(object):
                         }
                     )
 
-        with open(os.path.join(settings.BASE_DIR, 'utils/tuo/data/all_cards.json'), 'w') as all_cards_file:
+        with open(os.path.join(settings.BASE_DIR, "utils", "tuo", "data", "all_cards.json"), "w") as all_cards_file:
             json.dump(cards_list, all_cards_file, indent=4)
 
     def card_id_to_name(self, card_id):
 
+        # print "Card Data:", [matching for matching in self.cards_list if matching["card_id"] == card_id][0]
         return [matching for matching in self.cards_list if matching["card_id"] == card_id][0]
 
         # return [matching['card_name'] + '-' + matching['card_level'] for matching in self.cards_list
