@@ -12,7 +12,7 @@ import utils.tyrant_utils as tyrant_utils
 from jedisite.forms import UserForm, UserProfileForm, GameAccountForm, GameAccountBasicForm, DeckForm, \
     UserIsActiveForm, AllowCommandForm, PasswordChangeForm, UploadInventoryForm, ChangeGuildForm
 from jedisite.models import GameAccount, User, Decks, ActionLog, Benchmarks, WarStats
-from jedisite.serializers import DecksSerializer, ForceAuthSerializer, AccountsSerializer
+from jedisite.serializers import DecksSerializer, ForceAuthSerializer, AccountsSerializer, InventorySerializer
 from .tasks import benchmark_offense_sim, benchmark_defense_sim, check_war_status
 
 
@@ -193,7 +193,7 @@ def update_postdata(request):
 
 
 @login_required
-def get_owned_cards(request):
+def download_inventory(request):
     if request.method == 'GET':
 
         if 'account_name' in request.GET:
@@ -207,17 +207,17 @@ def get_owned_cards(request):
                 account = GameAccount.objects.get(name=account_name)
 
                 if account.postdata:
-                    account_details = tyrant_utils.AccountDetails()
-                    card_list = account_details.get_owned_cards(account.postdata)
+                    account_details = tyrant_utils.AccountDetails(account.postdata)
+                    inventory = account_details.format_inventory()
                     # print("Cardlist:", card_list)
                 else:
-                    card_list = account.inventory
+                    inventory = account.inventory
                     # print(card_list)
 
                 f = StringIO.StringIO()
                 writer = csv.writer(f)
 
-                for card in card_list:
+                for card in inventory:
                     # print(card)
                     writer.writerow([card])
 
@@ -862,3 +862,31 @@ def api_account_list(request):
         else:
             content = {status.HTTP_403_FORBIDDEN: 'Permission Denied'}
             return Response(content)
+
+
+@api_view(['GET', ])
+@user_passes_test(is_officer)
+def user_inventory(request):
+
+    if "account" in request.GET:
+
+        try:
+            account = GameAccount.objects.get(name=request.GET['account'])
+            print "Account Exists:", account.name
+        except GameAccount.DoesNotExist:
+            content = {status.HTTP_404_NOT_FOUND: 'Game Account Does Not Exist'}
+            return Response(content)
+
+        if account.postdata:
+            account_details = tyrant_utils.AccountDetails(account.postdata)
+            card_list = account_details.format_inventory()
+        else:
+            card_list = account.inventory
+
+        serializer = InventorySerializer(card_list)
+        return Response(serializer.data)
+
+    else:
+
+        content = {status.HTTP_404_NOT_FOUND: 'No game account specified'}
+        return Response(content)
