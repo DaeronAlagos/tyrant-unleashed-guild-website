@@ -34,3 +34,8 @@ class AccountsSerializer(serializers.Serializer):
 
         # model = GameAccount
         # fields = ("postdata", "kong_name", "name", "guild", "inventory", "deck")
+
+
+class InventorySerializer(serializers.ListSerializer):
+
+    child = serializers.JSONField()
