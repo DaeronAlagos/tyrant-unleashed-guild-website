@@ -255,7 +255,7 @@ def user_accounts(request):
                 account.kong_name = str(postdata_params['kong_name'][0])
                 account.postdata = add_account_form['postdata'].value()
                 account_params = tyrant_api.create_request('init', account.postdata)
-                account.name = str(account_params['user_data']['name'])
+                account.name = str(account_params['user_data']['name'].encode('utf-8'))
                 try:
                     account.guild = str(account_params['faction']['name'])
                 except KeyError:
@@ -381,6 +381,12 @@ def user_decks(request):
         'Mortar Tower-4',
         'Corrosive Spore-4'
     ]
+    benchmark_structures = {
+        "friendly_offense": "Sky Fortress-4, Sky Fortress-4",
+        "friendly_defense": "Foreboding Archway-4",
+        "enemy_offense": "Sky Fortress-4, Sky Fortress-4",
+        "enemy_defense": "Foreboding Archway-4, Foreboding Archway-4"
+    }
 
     if request.method == 'POST':
 
@@ -391,6 +397,7 @@ def user_decks(request):
             post_mode = request.POST.get('add_deck-mode')
             post_type = request.POST.get('add_deck-type')
             post_bge = request.POST.get('add_deck-bge')
+            # print "post bge:", post_bge
             post_friendly_structures_list = request.POST.get('add_deck-friendly_structures').split(",")
             for idx, structure in enumerate(post_friendly_structures_list):
                 post_friendly_structures_list[idx] = structure.strip().title() + "-4"
@@ -460,15 +467,19 @@ def user_decks(request):
                 # print deck_form.enemy_structures
                 # print "Deck ID:", deck_id.id
                 if deck_id.type == "Faction" and deck_id.mode == "Offense" and deck_id.bge == {
-                    "global": {"global_id": "", "name": "None"}, "friendly": {"friendly_id": "", "name": "None"},
-                    "enemy": {"enemy_id": "",
-                              "name": "None"}} and deck_id.friendly_structures == "Sky Fortress-4, Sky Fortress-4" and deck_id.enemy_structures == "Illuminary Blockade-4":
+                    "global": {"global_id": "", "name": "None"},
+                    "friendly": {"friendly_id": "", "name": "None"},
+                    "enemy": {"enemy_id": "", "name": "None"}} and \
+                    deck_id.friendly_structures == benchmark_structures["friendly_offense"] and \
+                        deck_id.enemy_structures == benchmark_structures["enemy_defense"]:
                     # print "Benchmark Offense Deck"
                     benchmark_offense_sim.delay(add_deck_form['deck'].value(), deck_id.id)
                 if deck_id.type == "Faction" and deck_id.mode == "Defense" and deck_id.bge == {
-                    "global": {"global_id": "", "name": "None"}, "friendly": {"friendly_id": "", "name": "None"},
-                    "enemy": {"enemy_id": "",
-                              "name": "None"}} and deck_id.friendly_structures == "Illuminary Blockade-4" and deck_id.enemy_structures == "Sky Fortress-4, Sky Fortress-4":
+                    "global": {"global_id": "", "name": "None"},
+                    "friendly": {"friendly_id": "", "name": "None"},
+                    "enemy": {"enemy_id": "", "name": "None"}} and \
+                    deck_id.friendly_structures == benchmark_structures["friendly_defense"] and \
+                        deck_id.enemy_structures == benchmark_structures["enemy_offense"]:
                     # print "Benchmark Defense Deck"
                     benchmark_defense_sim.delay(add_deck_form['deck'].value(), deck_id.id)
                 return HttpResponseRedirect('/profile/decks/')
@@ -484,7 +495,7 @@ def user_decks(request):
         decks = Decks.objects.filter(name__in=accounts).values()
 
         for deck in decks:
-            print "Deck:", deck
+            # print "Deck:", deck
 
             card_list = [deck['deck']["commander"]["name"]]
 
@@ -872,7 +883,6 @@ def user_inventory(request):
 
         try:
             account = GameAccount.objects.get(name=request.GET['account'])
-            print "Account Exists:", account.name
         except GameAccount.DoesNotExist:
             content = {status.HTTP_404_NOT_FOUND: 'Game Account Does Not Exist'}
             return Response(content)
