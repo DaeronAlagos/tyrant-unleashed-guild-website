@@ -21,14 +21,9 @@ class ForceAuthSerializer(serializers.ModelSerializer):
 
 
 # class AccountsSerializer(serializers.ModelSerializer):
-class AccountsSerializer(serializers.Serializer):
+class AccountsSerializer(serializers.ListSerializer):
 
-    postdata = serializers.CharField(max_length=2048)
-    kong_name = serializers.CharField(max_length=64)
-    name = serializers.CharField(max_length=64)
-    guild = serializers.CharField(max_length=64)
-    inventory = serializers.ListField()
-    deck = serializers.JSONField()
+    child = serializers.JSONField()
 
     # class Meta:
 
