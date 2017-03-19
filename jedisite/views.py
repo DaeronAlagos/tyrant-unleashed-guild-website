@@ -463,9 +463,7 @@ def user_decks(request):
                     friendly_structures=deck_form.friendly_structures,
                     enemy_structures=deck_form.enemy_structures
                 )
-                # print deck_form.friendly_structures
-                # print deck_form.enemy_structures
-                # print "Deck ID:", deck_id.id
+
                 if deck_id.type == "Faction" and deck_id.mode == "Offense" and deck_id.bge == {
                     "global": {"global_id": "", "name": "None"},
                     "friendly": {"friendly_id": "", "name": "None"},
@@ -482,6 +480,7 @@ def user_decks(request):
                         deck_id.enemy_structures == benchmark_structures["enemy_offense"]:
                     # print "Benchmark Defense Deck"
                     benchmark_defense_sim.delay(add_deck_form['deck'].value(), deck_id.id)
+
                 return HttpResponseRedirect('/profile/decks/')
 
     else:
@@ -841,38 +840,43 @@ def force_auth(request):
 def api_account_list(request):
     if request.method == 'GET':
 
-        user = request.user
+        decks = Decks.objects.filter(
+            mode="Offense").filter(
+            type="Faction").filter(
+            friendly_structures="Sky Fortress-4, Sky Fortress-4").filter(
+            enemy_structures="Foreboding Archway-4, Foreboding Archway-4"
+        )
+        accounts = GameAccount.objects.filter(name__in=decks.values('name'))
 
-        if user.username == "DaeronAlagos":
+        accounts_to_sim = []
 
-            decks = Decks.objects.filter(
-                mode="Offense").filter(
-                type="Faction").filter(
-                friendly_structures="Sky Fortress-4, Sky Fortress-4").filter(
-                enemy_structures="Illuminary Blockade-4"
-            )
-            accounts = GameAccount.objects.filter(name__in=decks.values('name'))
+        for account in accounts:
 
-            for account in accounts:
+            for deck in decks:
 
-                for deck in decks:
+                if deck.name == account.name:
 
-                    if deck.name == account.name:
+                    card_list = [deck.deck["commander"]["name"]]
 
-                        card_list = [deck.deck["commander"]["name"]]
+                    for card in deck.deck["cards"]:
+                        card_list.append(card["name"])
 
-                        for card in deck.deck["cards"]:
-                            card_list.append(card["name"])
+                    card_names = ", ".join(card_list)
 
-                        card_names = ', '.join(card_list)
-                        account.deck = card_names
+                    accounts_to_sim.append(
+                        {
+                            "account": account.name,
+                            "guild": account.guild,
+                            "seed": card_names
+                        }
+                    )
 
-            serializer = AccountsSerializer(accounts, many=True)
-            return Response(serializer.data)
+        serializer = AccountsSerializer(accounts_to_sim)
+        return Response(serializer.data)
 
-        else:
-            content = {status.HTTP_403_FORBIDDEN: 'Permission Denied'}
-            return Response(content)
+    else:
+        content = {status.HTTP_403_FORBIDDEN: 'Permission Denied'}
+        return Response(content)
 
 
 @api_view(['GET', ])
