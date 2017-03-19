@@ -327,7 +327,7 @@ class CardReader(object):
 
     def card_id_to_name(self, card_id):
 
-        # print "Card Data:", [matching for matching in self.cards_list if matching["card_id"] == card_id][0]
+        print "Card Data:", [matching for matching in self.cards_list if matching["card_id"] == card_id][0]
         return [matching for matching in self.cards_list if matching["card_id"] == card_id][0]
 
         # return [matching['card_name'] + '-' + matching['card_level'] for matching in self.cards_list
@@ -351,7 +351,7 @@ class CardReader(object):
         for i in range(1, int(amount) + 1):
             cards.append(
                 ([matching["card_id"] for matching in self.cards_list if
-                 (matching["card_name"] == name and matching["card_level"]) == level][0], name)
+                 (matching["card_name"] == name and matching["card_level"]) == level][0], card_name)
             )
 
         return cards
@@ -406,4 +406,5 @@ class CardReader(object):
         except IndexError:
             bge_as_dict["enemy"]["name"] = "None"
 
+        # print "bge_as_dict:", bge_as_dict
         return bge_as_dict
