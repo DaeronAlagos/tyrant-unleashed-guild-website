@@ -252,7 +252,7 @@ class DeckForm(forms.ModelForm):
         cards = card_reader.cards_list
         for card in player_cards_list:
             m = re.search(r"^\s?(.*?[\d]?)(-\d)?[ ]?#?(\d{1,2})?$", card)
-            print "Clean Deck:", (unicode(m.group(1)))
+            # print "Clean Deck:", (unicode(m.group(1)))
             if not any(d['card_name'] == unicode(m.group(1)) for d in cards):
                 raise forms.ValidationError(card + " is not a valid card!")
 
