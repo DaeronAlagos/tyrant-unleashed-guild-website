@@ -190,17 +190,30 @@ class AccountDetails(object):
 
         # print("response data:", response_data)
 
-        owned_cards = list()
+        inventory = {
+            "owned": [],
+            "salvaged": []
+        }
+
         for (cid, value) in response_data['user_cards'].items():
             if int(value['num_owned']) > 0:
-                owned_cards.append(
+                inventory["owned"].append(
                     {
                         "card_id": cid,
                         "quantity": value["num_owned"]
                     }
                 )
 
-        return owned_cards
+        for card_id, data in response_data['buyback_data'].items():
+            if int(data['number']) > 0:
+                inventory["salvaged"].append(
+                    {
+                        "card_id": card_id,
+                        "quantity": data["number"]
+                    }
+                )
+
+        return inventory
 
     def format_inventory(self):
 
@@ -215,7 +228,7 @@ class AccountDetails(object):
                     faction_name=faction
                 )
             )
-            for card in self.owned_cards:
+            for card in self.owned_cards["owned"]:
                 card_data = card_reader.card_id_to_name(int(card["card_id"]))
                 quantity = card["quantity"]
 
@@ -245,6 +258,19 @@ class AccountDetails(object):
                             inventory_items.append("{card_name}".format(
                                 card_name=card_data['card_name']
                             ))
+
+        inventory_items.append("// Salvaged Cards //")
+
+        for card in self.owned_cards["salvaged"]:
+            card_data = card_reader.card_id_to_name(int(card['card_id']))
+            quantity = card["quantity"]
+
+            inventory_items.append("// {card_name}-{card_level} #{quantity}".format(
+                card_name=card_data['card_name'],
+                card_level=card_data['card_level'],
+                quantity=quantity
+            ))
+
 
         # print "cards list:", inventory_items
         return inventory_items
@@ -327,7 +353,7 @@ class CardReader(object):
 
     def card_id_to_name(self, card_id):
 
-        print "Card Data:", [matching for matching in self.cards_list if matching["card_id"] == card_id][0]
+        # print "Card Data:", [matching for matching in self.cards_list if matching["card_id"] == card_id][0]
         return [matching for matching in self.cards_list if matching["card_id"] == card_id][0]
 
         # return [matching['card_name'] + '-' + matching['card_level'] for matching in self.cards_list
