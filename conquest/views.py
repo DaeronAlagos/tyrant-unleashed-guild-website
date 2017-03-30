@@ -14,30 +14,30 @@ def conquest_overview(request):
     import threading
 
     # account = GameAccount.objects.get(name="pajammyjam")
-    account = GameAccount.objects.get(name="ThibautW2")
+    account = GameAccount.objects.get(name="rogerawong")
 
     zone_tiers = [
         ("Asphodel Nexus", 12),
         ("Phobos Station", 11),
         # Tier 2
-        # ("Ashrock Redoubt", 21),
-        # "The Spire",
+        ("Ashrock Redoubt", 21),
+        ("The Spire", 1),
         ("SkyCom Complex", 7),
         # ("Jotun's Pantheon", 3),
         # "Magma Foundry",
-        # ("Baron's Claw Labs", 20),
+        ("Baron's Claw Labs", 20),
         ("Andar Quarantine", 18),
-        ("Borean Forges", 16),
-        ("Red Maw Base", 8),
-        ("Brood Nest", 6),
+        # ("Borean Forges", 16),
+        # ("Red Maw Base", 8),
+        # ("Brood Nest", 6),
         # Tier 1
-        ("Colonial Relay", 22),
-        # "Norhaven",
+        # ("Colonial Relay", 22),
+        ("Norhaven", 2),
         ("Infested Depot", 5),
         # ("Malort's Den", 15),
-        # "Cleave Rock",
+        ("Cleave Rock", 14),
         # ("Enclave Landing", 17),
-        ("Mech Graveyard", 9),
+        # ("Mech Graveyard", 9),
         # ("Elder Port", 19),
         ("Seismic Beacon", 10),
         ("Tyrolian Outpost", 4),
