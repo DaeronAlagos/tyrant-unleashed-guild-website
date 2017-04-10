@@ -271,7 +271,6 @@ class AccountDetails(object):
                 quantity=quantity
             ))
 
-
         # print "cards list:", inventory_items
         return inventory_items
 
@@ -304,6 +303,8 @@ class ConquestUpdate(object):
 class CardReader(object):
 
     def __init__(self):
+
+        self.cards_list = None
 
         try:
             with open(os.path.join(settings.BASE_DIR, "utils", "tuo", "data", "all_cards.json")) as all_cards_file:
@@ -377,7 +378,7 @@ class CardReader(object):
         for i in range(1, int(amount) + 1):
             cards.append(
                 ([matching["card_id"] for matching in self.cards_list if
-                 (matching["card_name"] == name and matching["card_level"]) == level][0], card_name)
+                 (matching["card_name"] == name and matching["card_level"]) == level][0], name)
             )
 
         return cards
