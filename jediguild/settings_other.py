@@ -1,6 +1,3 @@
-from __future__ import absolute_import
-from celery.schedules import crontab
-from datetime import timedelta
 """
 Django settings for jediguild project.
 
@@ -132,9 +129,6 @@ STATICFILES_DIRS = (
     STATIC_PATH,
 )
 
-# STATIC_ROOT = STATIC_PATH
-
-# Celery Settings
 BROKER_URL = 'redis://localhost:6379/0'
 BROKER_TRANSPOST = 'redis'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'
@@ -142,22 +136,3 @@ CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 # CELERY_TIMEZONE = 'Africa/Nairobi'
-CELERYBEAT_SCHEDULE = {
-    # Executes every day at 6pm
-    'update-xmls-every-day-at-1800': {
-        'task': 'tasks.update_xmls',
-        'schedule': crontab(hour=19, minute=0),
-        # 'args': (16, 16),
-    },
-    # Executes every 6 hours
-    'check-for-war-endtime': {
-        'task': 'tasks.check_war_status',
-        'schedule': crontab(minute=0, hour='*/6'),
-        # 'args': (16, 16),
-    },
-}
-
-CELERY_TIMEZONE = 'UTC'
-
-# Login Decorator
-LOGIN_URL = '/login/'
