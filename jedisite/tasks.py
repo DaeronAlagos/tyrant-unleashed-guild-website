@@ -22,7 +22,7 @@ from utils.tyrant_utils import CardReader
 def benchmark_offense_sim(deck, deck_id):
 
     import os
-    from subprocess import check_output as co
+    import subprocess
 
     tuo_path = os.path.join(settings.BASE_DIR, "utils", "tuo")
     tuo_command = os.path.join(tuo_path, "tuo.exe")
@@ -31,32 +31,41 @@ def benchmark_offense_sim(deck, deck_id):
     gauntlet = "Benchmark"
     gbge = "Counterflux"
 
-    result = co(["{tuo_command}".format(tuo_command=tuo_command),
-                 "{seed}".format(seed=deck),
-                 "{GauntletOffense}".format(GauntletOffense=gauntlet),
-                 "gw",
-                 "ordered",
-                 "yf",
-                 "{friendly_offense_structures}".format(friendly_offense_structures=friendly_offense_structures),
-                 "ef",
-                 "{enemy_defense_structures}".format(enemy_defense_structures=enemy_defense_structures),
-                 "_benchmark",
-                 "-e",
-                 "{gbge}".format(gbge=gbge),
-                 "-t",
-                 "{Threads}".format(Threads=1),
-                 "sim",
-                 "{Iteration}".format(Iteration=1000)], cwd=tuo_path, shell=True).splitlines()
-    score = result[-3].split(': ')[1].split('(')[0]
-    # print score
-    Benchmarks.objects.update_or_create(deck_id=deck_id, defaults={'deck_id': deck_id, 'score': score})
+    try:
+        result = subprocess.check_output(
+            [
+                "{tuo_command}".format(tuo_command=tuo_command),
+                "{seed}".format(seed=deck),
+                "{GauntletOffense}".format(GauntletOffense=gauntlet),
+                "gw",
+                "ordered",
+                "yf",
+                "{friendly_offense_structures}".format(friendly_offense_structures=friendly_offense_structures),
+                "ef",
+                "{enemy_defense_structures}".format(enemy_defense_structures=enemy_defense_structures),
+                "_benchmark",
+                "-e",
+                "{gbge}".format(gbge=gbge),
+                "-t",
+                "{Threads}".format(Threads=1),
+                "sim",
+                "{Iteration}".format(Iteration=1000),
+            ],
+            cwd=tuo_path
+        ).splitlines()
+        score = result[-3].split(': ')[1].split('(')[0]
+        # print score
+        Benchmarks.objects.update_or_create(deck_id=deck_id, defaults={'deck_id': deck_id, 'score': score})
+
+    except subprocess.CalledProcessError as err:
+        print err
 
 
 @app.task
 def benchmark_defense_sim(deck, deck_id):
 
     import os
-    from subprocess import check_output as co
+    import subprocess
 
     tuo_path = os.path.join(settings.BASE_DIR, "utils", "tuo")
     tuo_command = os.path.join(tuo_path, 'tuo.exe')
@@ -65,27 +74,34 @@ def benchmark_defense_sim(deck, deck_id):
     gauntlet = "Benchmark"
     gbge = "Counterflux"
 
-    result = co([
-        "{tuo_command}".format(tuo_command=tuo_command),
-        "{seed]".format(seed=deck),
-        "{gauntlet_defense}".format(gauntlet_defense=gauntlet),
-        "gw-defense",
-        "enemy:ordered",
-        "yf",
-        "{friendly_defense_structures}".format(friendly_defense_structures=friendly_defense_structures),
-        "ef",
-        "{enemy_offense_structures}".format(enemy_offense_structures=enemy_offense_structures),
-        "-e",
-        "{gbge}".format(gbge=gbge),
-        "-t",
-        "{threads}".format(threads=1),
-        "_benchmark",
-        "sim",
-        "{iterations}".format(iterations=1000)], cwd=tuo_path, shell=True).splitlines()
-    # print result
-    score = result[-3].split(': ')[1].split(' (')[0]
-    # print score
-    Benchmarks.objects.update_or_create(deck_id=deck_id, defaults={'deck_id': deck_id, 'score': score})
+    try:
+        result = subprocess.check_output(
+            [
+                "{tuo_command}".format(tuo_command=tuo_command),
+                "{seed}".format(seed=deck),
+                "{gauntlet_defense}".format(gauntlet_defense=gauntlet),
+                "gw-defense",
+                "enemy:ordered",
+                "yf",
+                "{friendly_defense_structures}".format(friendly_defense_structures=friendly_defense_structures),
+                "ef",
+                "{enemy_offense_structures}".format(enemy_offense_structures=enemy_offense_structures),
+                "-e",
+                "{gbge}".format(gbge=gbge),
+                "-t",
+                "{threads}".format(threads=1),
+                "_benchmark",
+                "sim",
+                "{iterations}".format(iterations=1000),
+            ],
+            cwd=tuo_path,
+        ).splitlines()
+        # print result
+        score = result[-3].split(': ')[1].split(' (')[0]
+        # print score
+        Benchmarks.objects.update_or_create(deck_id=deck_id, defaults={'deck_id': deck_id, 'score': score})
+    except subprocess.CalledProcessError as err:
+        print err
 
 
 @app.task

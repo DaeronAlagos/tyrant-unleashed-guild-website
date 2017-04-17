@@ -383,7 +383,7 @@ def user_decks(request):
     ]
     benchmark_structures = {
         "friendly_offense": "Sky Fortress-4, Sky Fortress-4",
-        "friendly_defense": "Foreboding Archway-4",
+        "friendly_defense": "Foreboding Archway-4, Foreboding Archway-4",
         "enemy_offense": "Sky Fortress-4, Sky Fortress-4",
         "enemy_defense": "Foreboding Archway-4, Foreboding Archway-4"
     }
