@@ -1,29 +1,26 @@
-Benchmark_high: /^Benchmark_high_\d\d$/
-Benchmark_high_01:Silus the Corrupt, Alpha Replicant, Therion Aetherstorm, Avenger XK-C, Ultimata Ragefueled, Orbo the Wrathful, Hunchback Cannonade, Aquiline Outrider #2, Phobostrooper Dario
-Benchmark_high_02:Councilor Constantine, Alpha Ferocity, Ontos Anti-Artillery, Roving Pariah #5
-Benchmark_high_03:Typhon the Mad, Alpha Replicant, Typhon's Pupil, Therion Aetherstorm, Inquisitor's Domain, Irvos Mistwalker, Ruin Crawler, Kentauros Rebel
-Benchmark_high_04:Silus the Warlord, Alpha Slayer, Yobedysseus, Ultimata Ragefueled, Irvos Mistwalker, Planet Shaper, Eon United, Bolt Crag
-Benchmark_high_05:Councilor Constantine, Alpha Replicant, Vile Darter, Majestic Falcon, Phobostrooper Dario, Badlands Recon, Altar Defender, Irvos Mistwalker, Ultimata Ragefueled
-Benchmark_mid: /^Benchmark_mid_\d\d$/
-Benchmark_mid_01:Lord Halcyon, Alpha Replicant, Stormspear, Yobedysseus, Ambush Neutralizer, Ornate Browbeater, Orbo the Wrathful, 16-Barrel Boomer, Ruin Crawler, Improvised Insurgent #2, Ambush Neutralizer
-Benchmark_mid_02:Nexor the Farseer, Alpha Slayer, Zoakruna the Infinite, Majestic Falcon, Therion Aetherstorm, Abbey of Mysteries, Inquisitor's Domain, Planet Shaper, Ultimata Ragefueled
-Benchmark_mid_03:Nexor the Farseer, Alpha Replicant, Cosmic Bladed, Vile Darter, Archduchess Erexin, Zoakruna the Endless, Therion Aetherstorm, Sorael the Restorer, Saiph Starmaw, Irvos Mistwalker
-Benchmark_mid_04:Tabitha Liberated, Alpha Terror, Vile Darter, Ymir of the Void, Silver Vanguard #3
-Benchmark_mid_05:Councilor Constantine, Alpha Replicant, Kathryn of the Throne, Bolt Crag, Ultimata Ragefueled, Cleric Transformer, Roving Pariah, Ultimata Ragefueled, Sacred Twin-Engines #2
-Benchmark_mid_06:Councilor Constantine, Alpha Flayer, Thronebreaker, Tabernacle of Andor, Roving Pariah, Thronebreaker
-Benchmark_mid_07:Councilor Constantine, Alpha Ferocity, Monastery of Minerva, Vile Darter, Tabernacle of Andor, Vile Darter, Sanctified Quester, Scorn of Talos
-Benchmark_mid_08:Silus the Corrupt, Alpha Replicant, Phobostrooper Dario #2, Shock Disruptor #2, Therion Aetherstorm, Duchess Rintara, Ruin Crawler, Shock Disruptor #2
-Benchmark_mid_09:Typhon the Mad, Alpha Slayer, Zoakruna the Endless, Vile Darter #2, Abbey of Mysteries, Zoakruna the Endless, Saiph Starmaw, Boneshaper Nemesis, Saiph Starmaw
-Benchmark_mid_10:Tabitha Liberated, Alpha United, Zoakruna the Endless, Vile Darter, Argonaut Captain, Forgeborn Immortal, Argonaut Captain, Saiph Starmaw, Zoakruna the Endless
-Benchmark_low: /^Benchmark_low_\d\d$/
-Benchmark_low_01:Silus the Corrupt, Alpha Destroyer, Atomic Wardriver, Slick Garroter, Inquisitor's Domain, Xebor Comet, Atomic Wardriver, Rogalthian Wurm
-Benchmark_low_02:Battlemaster Krellus, Alpha Replicant, Xedronic Roamer, Inquisitor's Domain, Badlands Recon, Rogalthian Wurm, Altar Defender, Ruin Crawler, Therion Aetherborn, Ambush Neutralizer
-Benchmark_low_03:Arkadios Ultimate, Alpha Replicant, Kobex Cryotech, Unity Safeguard #2, Rogalthian Wurm, Albatross Vigilant, Thane Skullsplitter, Albatross Vigilant, Unity Safeguard, Albatross Vigilant
-Benchmark_low_04:Councilor Constantine, Alpha Replicant, Rukoshin Outfitted, Ontos Anti-Artillery, Stoic Golem, Jotun's Bastion, Rukoshin Outfitted, Paladin's Barding, Myrvern's Design, Dagger Pinion, Shrouded Cherisher, Captain Beatrix XII
-Benchmark_low_05:Battlemaster Krellus, Alpha Slayer, Typhon's Pupil, Jotun's Bastion, Irvos Mistwalker, Inquisitor's Domain, Irvos Mistwalker, Ruin Crawler, Typhon's Pupil, Therion Aetherborn
-Benchmark_low_06:Arkadios Ultimate, Alpha Replicant, Vile Darter, Boneshaper Nemesis, Zoakruna the Infinite, Balor the Void Eye, Sorael the Restorer, Blademaster Hektor, Geiger Battlemech, Saiph Starmaw
-Benchmark_low_07:Silus the Warlord, Alpha Slayer, Jackal Skimmer #4, Vlade's Refiner, Sulfuris Refiner
-Benchmark_low_08:Dracorex Hivelord, Alpha Replicant, Rogalthian Wurm, 16-Barrel Boomer, Ultimata Ragefueled, Orbo the Wrathful, Irvos Mistwalker, Erebus Mega City, Slick Garroter, Ruin Crawler
-Benchmark_low_09:Battlemaster Krellus, Alpha Slayer, Zoakruna the Infinite #2, Tri-Buffaloader, Stratoslayer #4, Tri-Buffaloader
-Benchmark_low_10:Daedalus Enraged, Alpha Slayer, Ultimata Ragefueled #2, Explosive Surge, Xebor Comet
-Benchmark: /^(Benchmark_high|Benchmark_mid|Benchmark_low)$/
+Benchmark_01: Conqueror Krellus, Alpha Slayer, Vile Darter, Halcyon's Ruffian, Inquisitor's Domain, Typhon's Pupil, Planet Shaper, Stratoslayer, Halcyon's Ruffian, Stratoslayer, Therion Aetherstorm
+Benchmark_02: Typhon the Insane, Alpha Slayer, Windstorm Successor, Atmos Flyer, Inquisitor's Domain, Atmos Flyer, Windstorm Successor, Halcyon's Ruffian, Planet Shaper, Halcyon's Ruffian
+Benchmark_03: Tabitha Exiled, Alpha Replicant-3, Windstorm Successor, Vile Darter, Atmos Flyer, Inquisitor's Domain, Atmos Flyer, Stratoslayer, Therion Aetherstorm   
+Benchmark_04: Councilor Constantine, Alpha Scimitar-5, Tabernacle of Andor, Roving Pariah #3, Ontos Anti-Artillery, Tabernacle of Andor
+Benchmark_05: Silus the Corrupt, Alpha Scimitar, Tetrapede Volt, Ultimata Ragefueled, Kali the Devastator, Halcyon's Ruffian, Ultimata Ragefueled, Atomic Wardriver, Tri-Buffaloader, Stratoslayer
+Benchmark_06: Battlemaster Krellus, Alpha Replicant, Windstorm Successor #2, Vile Darter #2, Atmos Flyer, Stratoslayer, Atmos Flyer, Sorael the Restorer #2
+Benchmark_07: Councilor Constantine, Alpha Slayer, Windstorm Successor, Vile Darter #2, Windstorm Successor, Atmos Flyer #2, Therion Aetherstorm, Eidolon of Axiom, Sorael the Restorer
+Benchmark_08: Councilor Constantine, Alpha Replicant, Just Praetor, Ontos Anti-Artillery, Roving Pariah #2, Ontos Anti-Artillery, Iris Tempered, Sacred Twin-Engines #2
+Benchmark_09: Silus the Corrupt, Alpha Replicant, Windstorm Successor #2, Atmos Flyer #2, Ultimata Ragefueled #2, Atomic Wardriver
+Benchmark_10: Daedalus Enraged, Alpha Slayer, Therion Aetherstorm, Skullmaster Guru, Inquisitor's Domain, Xebor Comet, Inquisitor's Domain, Xebor Comet, Rogalthian Wurm, Corona Crusher #2, Sleek Beamshot   
+Benchmark_11: Typhon the Insane, Alpha Slayer, Typhon's Pupil, Atmos Flyer, Planet Shaper, Ambush Neutralizer, Therion Aetherstorm, Badlands Recon #2, Ruin Crawler
+Benchmark_12: Typhon the Mad, Alpha Slayer, Therion Aetherstorm, Zoakruna the Infinite, Irvos Mistwalker, Abhorrent Recluse, Saiph Starmaw, Planet Shaper, Argonaut Captain, Yobedysseus
+Benchmark_13: Typhon the Insane, Alpha Replicant, Typhon's Pupil, Exicon Vanisher, Therion Aetherstorm, Irvos Mistwalker, Ruin Crawler, Badlands Recon, Ruin Crawler, Badlands Recon, Dune Runner
+Benchmark_14: Typhon the Insane, Alpha Slayer, Vile Darter, Exicon Vanisher, Atmos Flyer, Saiph Starmaw, Therion Aetherstorm, Atmos Flyer, Vile Darter, Ruin Crawler #2
+Benchmark_15: Daedalus Enraged, Alpha Slayer, Vile Darter #2, Xebor Comet, Vile Darter, Xebor Comet, Primal Criterion #2
+Benchmark_16: Typhon the Mad, Alpha Scimitar, Vile Darter, Abbey of Mysteries, Balor the Void Eye, Vandal's Armory, Vile Darter
+Benchmark_17: Typhon the Insane, Alpha Replicant, Halcyon's Ruffian, Typhon's Pupil, Saiph Starmaw, Zoakruna the Infinite, Prodigious Falcon, Balor the Void Eye, Ruin Crawler, Halcyon's Ruffian
+Benchmark_18: Silus the Corrupt, Alpha Replicant-1, Ultimata Ragefueled, Inquisitor's Domain, Ultimata Ragefueled #2, Atomic Wardriver, Ultimata Ragefueled, Atomic Wardriver, Sleek Beamshot
+Benchmark_19: Typhon the Insane, Alpha Slayer, Vile Darter, Zoakruna the Infinite, Saiph Starmaw, Vile Darter, Therion Aetherstorm, Atmos Flyer #2, Halcyon's Ruffian #2
+Benchmark_20: Typhon the Insane, Alpha Replicant-2, Demi Constrictor, Bolt Crag, Abhorrent Recluse, Inquisitor's Domain, Rogalthian Wurm, Irvos Mistwalker, Bolt Crag, Ruin Crawler, Therion Aetherborn
+Benchmark_21: Daedalus Enraged, Alpha Replicant-2, Ultimata Ragefueled, Sleek Beamshot #2, Warp Fabricator, Sleek Beamshot, Atomic Wardriver, Sleek Beamshot #2 
+Benchmark_22: Daedalus Enraged, Alpha Proton, Xebor Comet, Sleek Beamshot, Loathe Abysswing #2, Xebor Comet, Ultimata Ragefueled, Sleek Beamshot #3
+Benchmark_23: Typhon the Insane, Alpha Ferocity, Tabernacle of Andor, Vile Darter #2, Rumbler Rickshaw
+Benchmark_24: Daedalus Enraged, Alpha Replicant-3, Typhon's Pupil, Bolt Crag, Inquisitor's Domain, Xebor Comet, Typhon's Pupil, Scorched Hellwing, Impostor Consign, Bolt Crag #3
+Benchmark_25: Silus the Corrupt, Alpha Scimitar-1, Ultimata Ragefueled, Irvos Mistwalker, Ultimata Ragefueled, Atomic Wardriver, Sleek Beamshot, Atomic Wardriver, Sleek Beamshot
+Benchmark: /Benchmark_\d\d/

@@ -29,6 +29,7 @@ def benchmark_offense_sim(deck, deck_id):
     friendly_offense_structures = "Sky Fortress, Sky Fortress"
     enemy_defense_structures = "Foreboding Archway, Foreboding Archway"
     gauntlet = "Benchmark"
+    gbge = "Counterflux"
 
     result = co(["{tuo_command}".format(tuo_command=tuo_command),
                  "{seed}".format(seed=deck),
@@ -40,6 +41,8 @@ def benchmark_offense_sim(deck, deck_id):
                  "ef",
                  "{enemy_defense_structures}".format(enemy_defense_structures=enemy_defense_structures),
                  "_benchmark",
+                 "-e",
+                 "{gbge}".format(gbge=gbge),
                  "-t",
                  "{Threads}".format(Threads=1),
                  "sim",
@@ -57,9 +60,10 @@ def benchmark_defense_sim(deck, deck_id):
 
     tuo_path = os.path.join(settings.BASE_DIR, "utils", "tuo")
     tuo_command = os.path.join(tuo_path, 'tuo.exe')
-    friendly_defense_structures = "Foreboding Archway"
+    friendly_defense_structures = "Foreboding Archway, Foreboding Archway"
     enemy_offense_structures = "Sky Fortress, Sky Fortress"
     gauntlet = "Benchmark"
+    gbge = "Counterflux"
 
     result = co([
         "{tuo_command}".format(tuo_command=tuo_command),
@@ -71,6 +75,8 @@ def benchmark_defense_sim(deck, deck_id):
         "{friendly_defense_structures}".format(friendly_defense_structures=friendly_defense_structures),
         "ef",
         "{enemy_offense_structures}".format(enemy_offense_structures=enemy_offense_structures),
+        "-e",
+        "{gbge}".format(gbge=gbge),
         "-t",
         "{threads}".format(threads=1),
         "_benchmark",
