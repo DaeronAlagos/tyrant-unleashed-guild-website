@@ -378,7 +378,7 @@ class CardReader(object):
         for i in range(1, int(amount) + 1):
             cards.append(
                 ([matching["card_id"] for matching in self.cards_list if
-                 (matching["card_name"] == name and matching["card_level"]) == level][0], name)
+                 (matching["card_name"] == name and matching["card_level"]) == level][0], card_name)
             )
 
         return cards
