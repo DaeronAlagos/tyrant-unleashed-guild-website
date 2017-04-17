@@ -465,7 +465,7 @@ def user_decks(request):
                 )
 
                 if deck_id.type == "Faction" and deck_id.mode == "Offense" and deck_id.bge == {
-                    "global": {"global_id": "", "name": "None"},
+                    "global": {"global_id": "", "name": "Counterflux"},
                     "friendly": {"friendly_id": "", "name": "None"},
                     "enemy": {"enemy_id": "", "name": "None"}} and \
                     deck_id.friendly_structures == benchmark_structures["friendly_offense"] and \
@@ -473,7 +473,7 @@ def user_decks(request):
                     # print "Benchmark Offense Deck"
                     benchmark_offense_sim.delay(add_deck_form['deck'].value(), deck_id.id)
                 if deck_id.type == "Faction" and deck_id.mode == "Defense" and deck_id.bge == {
-                    "global": {"global_id": "", "name": "None"},
+                    "global": {"global_id": "", "name": "Counterflux"},
                     "friendly": {"friendly_id": "", "name": "None"},
                     "enemy": {"enemy_id": "", "name": "None"}} and \
                     deck_id.friendly_structures == benchmark_structures["friendly_defense"] and \

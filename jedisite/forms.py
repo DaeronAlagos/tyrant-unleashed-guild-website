@@ -234,7 +234,7 @@ class DeckForm(forms.ModelForm):
                    'placeholder': 'Example: Commander, Card 1, Card 2, Card 3'}))
         self.fields['bge'] = forms.CharField(max_length=128, required=False, label=u'BGE', widget=forms.TextInput(
             attrs={'class': 'form-control margin-bottom-10',
-                   'placeholder': 'Example: Protect all 2, None, Triage (Leave blank for Benchmark)'}))
+                   'placeholder': 'Example: Protect all 2, None, Triage (Counterflux for benchmark)'}))
         self.fields['friendly_structures'] = forms.CharField(max_length=50, required=False,
                                                              label=u'Friendly Structures', widget=forms.TextInput(
                 attrs={'class': 'form-control margin-bottom-10',
