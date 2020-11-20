@@ -120,7 +120,7 @@ def update_xmls():
         "skills_set",
     ]
 
-    for i in range(1, 18 + 1):
+    for i in range(1, 19 + 1):
         xml_files.append(
             "cards_section_{section_id}".format(
                 section_id=i
