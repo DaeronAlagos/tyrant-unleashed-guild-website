@@ -88,7 +88,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'jediguild',
         'USER': 'jediguild',
-        'PASSWORD': 'sBTsxTPj*@o2',
+        'PASSWORD': os.environ['db_password'],
         'HOST': 'localhost',  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '5432',  # Set to empty string for default.
     }
